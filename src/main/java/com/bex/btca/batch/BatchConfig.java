@@ -68,6 +68,9 @@ public class BatchConfig  {
 		super();
 
 	}
+	public void gello() {
+		
+	}
 
 	///////////////// READERS //////////////////
 	@Bean
@@ -173,7 +176,6 @@ public class BatchConfig  {
 	
 	@Bean
 	public JdbcBatchItemWriter<EstadisticasRFQ> writerRfq(DataSource datasource) {
-		
 		return new JdbcBatchItemWriterBuilder<EstadisticasRFQ>()
 				.itemSqlParameterSourceProvider(new BeanPropertyItemSqlParameterSourceProvider<EstadisticasRFQ>())
 				.sql("INSERT INTO rfq (version) VALUES (:version)")
