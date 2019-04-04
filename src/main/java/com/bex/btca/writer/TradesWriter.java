@@ -27,6 +27,7 @@ public class TradesWriter implements ItemWriter<Totales> {
 	private HashMap<String, Integer> horasDelDia = new HashMap<String, Integer>();
 	
 	private JdbcTemplate jdbctemplate;
+	private String regexUM="^(([a-zA-Z0-9]{2})-(\\d{1})-([A-Z0-9]{9}))";
 
 	public TradesWriter(DataSource data) {
 		super();
@@ -41,7 +42,7 @@ public class TradesWriter implements ItemWriter<Totales> {
 		
 		for(Totales totales:item)
 			{
-			String valueIndex = totales.getStatus() + ";" +"F "+totales.getFecha_operativa() + ";" + totales.getAssset_class()+ ";"+totales.getSent();
+			String valueIndex = totales.getStatus() + ";" +"F "+totales.getFecha_operativa() + ";" + totales.getAssset_class()+";"+regexFind(totales.getId_trans())+";"+totales.getSent();
 			if (horasDelDia.get(valueIndex) == null) {
 				horasDelDia.put(valueIndex, 1 );
 				
@@ -67,12 +68,17 @@ public class TradesWriter implements ItemWriter<Totales> {
 	
 	
 	
-	public boolean regexFind(String regex, String texts) {
+	public String regexFind(String texts) {
 		// REGEX that matches 1 or more white space
-		Pattern patternOp = Pattern.compile(regex);
+		Pattern patternOp = Pattern.compile(regexUM);
 		Matcher matcherOp = patternOp.matcher(texts.toString());
-
-		return matcherOp.find();
+		
+		if(matcherOp.find()) {
+			return "UM";
+		}else {
+			return "";
+		}
+		
 	}
 	
 

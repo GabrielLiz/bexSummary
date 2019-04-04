@@ -190,7 +190,7 @@ public class BatchConfig  {
 		taskExecutor.setCorePoolSize(6);
 		taskExecutor.setMaxPoolSize(6);
 		taskExecutor.afterPropertiesSet();
-		return stepBuilderFactory.get("step1").<Trade, Totales>chunk(1000)
+		return stepBuilderFactory.get("carga").<Trade, Totales>chunk(1000)
 				.reader(this.readerMultiResource())
 				.processor(this.processor())
 				.writer(this.writeCarga(datasource))
@@ -201,7 +201,7 @@ public class BatchConfig  {
 	@Bean
 	public Step step2(DataSource data) {
 		
-		return stepBuilderFactory.get("step2")
+		return stepBuilderFactory.get("RFQs")
 				//.tasklet(new TaskletStep(data))
 				.<Totales, EstadisticasRFQ>chunk(1000)
 				.reader(this.readerRfq(data))
@@ -212,7 +212,7 @@ public class BatchConfig  {
 	
 	@Bean
 	public Step step3(DataSource data) {
-		return stepBuilderFactory.get("step3")
+		return stepBuilderFactory.get("PostTrade")
 				.<Totales, Totales>chunk(1000)
 				.reader(this.readerTrade(data))
 				.writer(new TradesWriter(data))
@@ -221,7 +221,7 @@ public class BatchConfig  {
 	
 	@Bean
 	public Step step4(DataSource data) {
-		return stepBuilderFactory.get("step4")
+		return stepBuilderFactory.get("escribiendo")
 				.tasklet(new TaskletStep(data))
 				.build();
 	}

@@ -25,4 +25,5 @@ DROP TABLE trade IF EXISTS;
 create table trade (
 id BIGINT IDENTITY NOT NULL PRIMARY KEY,
 busqueda VARCHAR(100),
-valores INTEGER);
+valores INTEGER
+);

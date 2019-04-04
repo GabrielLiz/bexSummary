@@ -127,7 +127,7 @@ public class TaskletStep implements Tasklet {
 		try {
 			fr = new FileWriter(file);
 			br = new BufferedWriter(fr);
-			br.write("Status;fecha de operativa;asset;subido;total" + System.getProperty("line.separator"));
+			br.write("Status;fecha de operativa;asset;posiblemente;subido;total" + System.getProperty("line.separator"));
 			for (EstadisticasTrade estadisticasTrade : dato) {
 				br.write(estadisticasTrade.getBusqueda()+";"+Integer.toString(estadisticasTrade.getValores())+ System.getProperty("line.separator"));
 			}
