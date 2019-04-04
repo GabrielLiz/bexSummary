@@ -32,22 +32,11 @@ public class JobListener extends JobExecutionListenerSupport{
 	
 	@Override
 	public void afterJob(JobExecution jobExecution) {
-		// TODO Auto-generated method stub
 		super.afterJob(jobExecution);
 		if(jobExecution.getStatus()==BatchStatus.COMPLETED) {
 			
 			
 	
-		
-			
-	//	jdbctemplate.query("SELECT * FROM btca", (rs, row) -> new Totales(rs.getString(2),rs.getString(3)))
-		//	.forEach(btca -> LOG.info("registro <" + btca +" >"));
-			
-			
-
-		
-		//	 jdbcTemplate.query("SELECT DISTINCT fecha_operativa FROM btca",(rs,row) values);
-			
 		}
 	}
 
