@@ -61,15 +61,15 @@ public class BatchConfig  {
 
 	@Autowired
 	public StepBuilderFactory stepBuilderFactory;
-	
+
 	MultiResourceItemReader<Trade> readers;
-	
+
 	public BatchConfig() {
 		super();
 
 	}
 	public void gello() {
-		
+
 	}
 
 	///////////////// READERS //////////////////
@@ -78,11 +78,12 @@ public class BatchConfig  {
 		FlatFileItemReader<Trade> reader = new FlatFileItemReader<Trade>();
 		reader.setLinesToSkip(1);
 		//reader.setResource(new FileSystemResource("C:/CSV/total.csv"));
-		
+
 		reader.setLineMapper(new DefaultLineMapper<Trade>() {
 			{
 				setLineTokenizer(new DelimitedLineTokenizer() {
 					{
+						setStrict(false);
 						setDelimiter(";");
 						setNames(new String[] { "IDdetransacción", "Version", "Acción", "Estatus", "FeedProducer",
 								"Repetir", "Razón", "Descripcióndelvalor", "ISIN", "Enviado", "Received",
@@ -99,8 +100,8 @@ public class BatchConfig  {
 					}
 				});
 			}
-		});	
-		
+		});
+
 		return reader;
 	}
 
@@ -113,10 +114,10 @@ public class BatchConfig  {
 				.rowMapper(new BeanPropertyRowMapper<>(Totales.class))
 				.queryProvider(provider)
 				.build();
-			
+
 		return databaseReader;
 	}
-	
+
 	@Bean
 	JdbcPagingItemReader<Totales> readerTrade(DataSource dataSource) {
 		PagingQueryProvider provider= createQueryProvider("SELECT *","FROM btca","WHERE version =''");
@@ -126,10 +127,10 @@ public class BatchConfig  {
 				.rowMapper(new BeanPropertyRowMapper<>(Totales.class))
 				.queryProvider(provider)
 				.build();
-			
+
 		return databaseReader;
 	}
-	
+
 ///////////////////////////////////////Processor/////////////////////////////////////////////
 
 	@Bean
@@ -137,23 +138,23 @@ public class BatchConfig  {
 
 		return new BTCAprocessor();
 	}
-	
+
 	//fuera de uso
 	@Bean
 	public RFQprocessor rfqProcessor() {
 
 		return new RFQprocessor();
 	}
-	
+
 ///////////////////////////////////WRITERS/////////////////////////////////////
 	@Bean
 	public FlatFileItemWriter<EstadisticasRFQ> writeTrade() {
-		
+
 		FlatFileItemWriter<EstadisticasRFQ> writer = new FlatFileItemWriter<EstadisticasRFQ>();
     	writer.setResource(new FileSystemResource("/CSV/Trades.csv"));
     	BeanWrapperFieldExtractor<EstadisticasRFQ> fieldExtractor = new BeanWrapperFieldExtractor<EstadisticasRFQ>();
-    	
-    	
+
+
     	writer.setLineAggregator(new DelimitedLineAggregator<EstadisticasRFQ>() {
             {
                 setDelimiter(";");
@@ -173,7 +174,7 @@ public class BatchConfig  {
 				.sql("INSERT INTO btca (id_trans, version, status, isin, sent, trade_type, fecha_operativa, assset_class) VALUES (:id_trans, :version, :status, :isin, :sent, :trade_type, :fecha_operativa, :assset_class)")
 				.dataSource(datasource).build();
 	}
-	
+
 	@Bean
 	public JdbcBatchItemWriter<EstadisticasRFQ> writerRfq(DataSource datasource) {
 		return new JdbcBatchItemWriterBuilder<EstadisticasRFQ>()
@@ -181,8 +182,8 @@ public class BatchConfig  {
 				.sql("INSERT INTO rfq (version) VALUES (:version)")
 				.dataSource(datasource).build();
 	}
-	
-//////////////////////////////////////STEPS////////////////////////////////////////////////////////////////////	
+
+//////////////////////////////////////STEPS////////////////////////////////////////////////////////////////////
 
 	@Bean
 	public Step step1(JdbcBatchItemWriter<Totales> writer, DataSource datasource) {
@@ -200,7 +201,7 @@ public class BatchConfig  {
 
 	@Bean
 	public Step step2(DataSource data) {
-		
+
 		return stepBuilderFactory.get("RFQs")
 				//.tasklet(new TaskletStep(data))
 				.<Totales, EstadisticasRFQ>chunk(1000)
@@ -209,7 +210,7 @@ public class BatchConfig  {
 				.writer(this.writerRfq(data))
 				.build();
 	}
-	
+
 	@Bean
 	public Step step3(DataSource data) {
 		return stepBuilderFactory.get("PostTrade")
@@ -218,14 +219,15 @@ public class BatchConfig  {
 				.writer(new TradesWriter(data))
 				.build();
 	}
-	
+
 	@Bean
 	public Step step4(DataSource data) {
 		return stepBuilderFactory.get("escribiendo")
 				.tasklet(new TaskletStep(data))
 				.build();
+				
 	}
-	
+
 	@Bean
 	public Job TradesJob(JobListener listener, Step step1, DataSource data) {
 		// ejecutar steps en paralelo
@@ -264,7 +266,7 @@ public class BatchConfig  {
 	private Map<String, Order> sortingByID() {
 		Map<String, Order> sortConfiguration = new HashMap<>();
 		sortConfiguration.put("id", Order.ASCENDING);
-		return sortConfiguration;	
+		return sortConfiguration;
 	}
 
 	//deprecated
@@ -276,21 +278,21 @@ public class BatchConfig  {
 		reader.setRowMapper(new BeanPropertyRowMapper<Totales>(Totales.class));
 		return reader;
 	}
-	
+
 	@Bean
 	public MultiResourceItemReader<Trade> readerMultiResource() {
-		 ResourcePatternResolver patternResolver = new PathMatchingResourcePatternResolver(); 
-		 Resource[] resources2 = null; 
-		 	try {  
-		 		resources2 = patternResolver.getResources("file:C:/CSV/*total.csv"); 
-		 	} catch(IOException e) 
-		 	{ 
-		 		e.printStackTrace(); 
-			} 
-		 	readers = new  MultiResourceItemReader<>(); 
+		 ResourcePatternResolver patternResolver = new PathMatchingResourcePatternResolver();
+		 Resource[] resources2 = null;
+		 	try {
+		 		resources2 = patternResolver.getResources("file:C:/CSV/*total.csv");
+		 	} catch(IOException e)
+		 	{
+		 		e.printStackTrace();
+			}
+		 	readers = new  MultiResourceItemReader<>();
 		 	readers.setResources(resources2);
 		 	readers.setDelegate(readerCarga());
 		 	return readers;
-				
+
 	}
 }
