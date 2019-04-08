@@ -29,8 +29,10 @@ public class TradesWriter implements ItemWriter<Totales> {
 
 	private JdbcTemplate jdbctemplate;
 	private String regexUM = "^(([a-zA-Z0-9]{2})-(\\d{1})-([A-Z0-9]{9}))";
-	private String regexFXALL = "^(([0-9]{7})_([0-3]))";
-	private String regexEQC =("^([a-zA-Z0-9]{16})|^(([0-9]).([0-9]{20}))");
+	private String regexEQC = "^([a-zA-Z0-9]{16})|^([a-zA-Z:\\-0-9]+.(2019|2018))";
+	private String BBG_360T = "^[8][0-9]+_[01]";
+	private String SBP = "^(([a-zA-Z0-9]*)(?:[-]))+[a-zA-Z0-9]*_[012]";
+	private String RET = "^[0-9]+_[01].[0-9]+";
 
 	public TradesWriter(DataSource data) {
 		super();
@@ -43,7 +45,8 @@ public class TradesWriter implements ItemWriter<Totales> {
 
 		for (Totales totales : item) {
 			String valueIndex = totales.getStatus() + ";" + "F " + totales.getFecha_operativa() + ";"
-					+ totales.getAssset_class() + ";" + regexFind(totales.getId_trans(),totales.getSent()	) + ";" + totales.getSent();
+					+ totales.getAssset_class() + ";" + regexFind(totales.getId_trans(), totales.getSent()) + ";"
+					+ totales.getSent();
 			if (horasDelDia.get(valueIndex) == null) {
 				horasDelDia.put(valueIndex, 1);
 
@@ -67,65 +70,77 @@ public class TradesWriter implements ItemWriter<Totales> {
 
 	}
 
-	public String regexFind(String texts,String hor) {
+	public String regexFind(String texts, String hor) {
 		// REGEX that matches 1 or more white space
 		String[] parts = hor.split(Pattern.quote(":"));
-		
-
-		Pattern patternUM = Pattern.compile(regexUM);
-		Matcher matcherUM = patternUM.matcher(texts.toString());
-		if (matcherUM.find()) {
-			
-			return "UM";
-		}
-		Pattern patternFX = Pattern.compile(regexFXALL);
-		Matcher matcherFX = patternFX.matcher(texts.toString());
-		if (matcherFX.find()) {
-			return "FXALL";
-		}
+		int minuto = Integer.parseInt(parts[1]);
+		// Busqueda EQC
 		Pattern patternEQC = Pattern.compile(regexEQC);
 		Matcher matcherEQC = patternEQC.matcher(texts.toString());
 		if (matcherEQC.find()) {
-			if(parts[0].equals("17")) {
-				int minuto=Integer.parseInt(parts[1]);
-				if(minuto>=30&&minuto<60) {
-					return "EQC 90% seguro";
+			if (parts[0].equals("17")) {
+				if (minuto >= 30 && minuto < 60) {
+					return "EQC";
 				}
-			
+			} else {
+				return "EQC *";
 			}
-			
+
 		}
+
+		/// BUSQUEDA de UM
+		Pattern patternUM = Pattern.compile(regexUM);
+		Matcher matcherUM = patternUM.matcher(texts.toString());
+		if (matcherUM.find()) {
+			if (parts[0].equals("01")) {
+				return "UM";
+			}
+		}
+		
+		/// BUSQUEDA de SBP
+		Pattern patternSBP = Pattern.compile(SBP);
+		Matcher matcherSBP = patternSBP.matcher(texts.toString());
+		if (matcherSBP.find()) {
+				return "UM";
+		}
+
+		/// BUSQUEDA 360 y BBG FXAL
+		Pattern patternBB30 = Pattern.compile(BBG_360T);
+		Matcher matcherBB30 = patternBB30.matcher(texts.toString());
+		if (matcherBB30.find()) {
+
+			if (parts[0].equals("22")) {
+				if (minuto >= 30 && minuto < 60) {
+					return "BBG";
+				}
+			}
+			if (parts[0].equals("23")) {
+				if (minuto >= 30 && minuto < 60) {
+					return "360T";
+				}
+			}
+			if (parts[0].equals("00")) {
+				if (minuto >= 30 && minuto < 60) {
+					return "FXAll";
+				}
+			}
+		}
+
+		// RET
+		Pattern patternRET = Pattern.compile(RET);
+		Matcher matcherRET = patternRET.matcher(texts.toString());
+		if (matcherRET.find()) {
+			if (parts[0].equals("21")) {
+				if (minuto >= 30 && minuto < 60) {
+					return "RET";
+				}
+			} else {
+				return "RET*";
+			}
+		}
+
 		return "";
 
-	}
-
-	public void write(StringBuilder dato) {
-		File file = new File("/CSV/Trades.csv");
-
-		FileWriter fr = null;
-		BufferedWriter br = null;
-		try {
-			fr = new FileWriter(file);
-			br = new BufferedWriter(fr);
-
-			br.write(dato.toString());
-			/*
-			 * for (String fecha : fechaOpe) { br.write(fecha+
-			 * System.getProperty("line.separator")); for (String string : horadesbida) {
-			 * br.write(string+ System.getProperty("line.separator")); }
-			 * System.getProperty("line.separator"); }
-			 */
-
-		} catch (IOException e) {
-			e.printStackTrace();
-		} finally {
-			try {
-				br.close();
-				fr.close();
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-		}
 	}
 
 }

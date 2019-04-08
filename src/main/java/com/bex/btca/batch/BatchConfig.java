@@ -120,7 +120,7 @@ public class BatchConfig  {
 
 	@Bean
 	JdbcPagingItemReader<Totales> readerTrade(DataSource dataSource) {
-		PagingQueryProvider provider= createQueryProvider("SELECT *","FROM btca","WHERE version =''");
+		PagingQueryProvider provider= createQueryProvider("SELECT *","FROM btca","WHERE version ='' AND id_trans !=''");
 		JdbcPagingItemReader<Totales> databaseReader =  new JdbcPagingItemReaderBuilder<Totales>()
 				.name("readerTrade")
 				.dataSource(dataSource)
@@ -225,7 +225,6 @@ public class BatchConfig  {
 		return stepBuilderFactory.get("escribiendo")
 				.tasklet(new TaskletStep(data))
 				.build();
-				
 	}
 
 	@Bean

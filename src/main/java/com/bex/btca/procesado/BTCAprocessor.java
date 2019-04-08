@@ -25,7 +25,7 @@ public class BTCAprocessor implements ItemProcessor<Trade, Totales> {
 	@Override
 	public Totales process(Trade item) throws Exception {
 		if (seenUsers.contains(item.regexFind())) {
-			System.out.println(item.toString());
+		//	System.out.println(item.toString());
 			return null;
 			
 		} else {
