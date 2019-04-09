@@ -49,12 +49,10 @@ public class TaskletStep implements Tasklet {
 	public String SBP_BTCA_RFQ = "SBP_BTCA_RFQ";
 
 	private StringBuilder resultadoRFQ;
-	private StringBuilder resultadoTrade;
 
 	private JdbcTemplate jdbctemplate;
-	private Resource outputResource = new FileSystemResource("outputData.csv");
-	FlatFileItemWriter writer;
 	ArrayList<String> listaRFQ;
+	private String fileName;
 
 	public TaskletStep(DataSource data) {
 		super();
@@ -66,8 +64,7 @@ public class TaskletStep implements Tasklet {
 	@Override
 	public RepeatStatus execute(StepContribution contribution, ChunkContext chunkContext) throws Exception {
 		 resultadoRFQ= new StringBuilder();
-		 resultadoTrade = new StringBuilder();
-		
+		 fileName();
 		
 		String sql = "SELECT * FROM trade";
 		List<EstadisticasTrade> fulldata = jdbctemplate.query(sql, new BeanPropertyRowMapper<EstadisticasTrade>(EstadisticasTrade.class));
@@ -90,8 +87,14 @@ public class TaskletStep implements Tasklet {
 		return null;
 	}
 
+	public void fileName() {
+		File[] files = new File("/CSV/").listFiles();
+		String valu = files[0].getName();
+		fileName= valu.split("_")[0];
+		
+	}
 	public void writeRFQ(StringBuilder dato) {
-		File file = new File("/CSV/rfq.csv");
+		File file = new File("/CSV/"+fileName+"_rfq.csv");
 
 		FileWriter fr = null;
 		BufferedWriter br = null;
@@ -120,7 +123,7 @@ public class TaskletStep implements Tasklet {
 	}
 	
 	public void writeTrade(	List<EstadisticasTrade> dato) {
-		File file = new File("/CSV/Trade.csv");
+		File file = new File("/CSV/"+fileName+"_Trade.csv");
 
 		FileWriter fr = null;
 		BufferedWriter br = null;
