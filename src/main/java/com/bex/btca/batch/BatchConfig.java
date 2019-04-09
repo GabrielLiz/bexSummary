@@ -44,6 +44,7 @@ import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
 import com.bex.btca.listener.JobListener;
+import com.bex.btca.listener.StepListener;
 import com.bex.btca.model.EstadisticasRFQ;
 import com.bex.btca.model.Totales;
 import com.bex.btca.model.Trade;
@@ -186,7 +187,7 @@ public class BatchConfig  {
 //////////////////////////////////////STEPS////////////////////////////////////////////////////////////////////
 
 	@Bean
-	public Step step1(JdbcBatchItemWriter<Totales> writer, DataSource datasource) {
+	public Step step1(JdbcBatchItemWriter<Totales> writer, DataSource datasource, StepListener lis) {
 		ThreadPoolTaskExecutor taskExecutor = new ThreadPoolTaskExecutor();
 		taskExecutor.setCorePoolSize(6);
 		taskExecutor.setMaxPoolSize(6);
@@ -195,12 +196,13 @@ public class BatchConfig  {
 				.reader(this.readerMultiResource())
 				.processor(this.processor())
 				.writer(this.writeCarga(datasource))
+				.listener(lis)
 				//.taskExecutor(taskExecutor) velocidad de multi hilo
 				.build();
 	}
 
 	@Bean
-	public Step step2(DataSource data) {
+	public Step step2(DataSource data, StepListener lis) {
 
 		return stepBuilderFactory.get("RFQs")
 				//.tasklet(new TaskletStep(data))
@@ -208,30 +210,33 @@ public class BatchConfig  {
 				.reader(this.readerRfq(data))
 				.processor(new RFQprocessor())
 				.writer(this.writerRfq(data))
+				.listener(lis)
 				.build();
 	}
 
 	@Bean
-	public Step step3(DataSource data) {
+	public Step step3(DataSource data,StepListener lis) {
 		return stepBuilderFactory.get("PostTrade")
 				.<Totales, Totales>chunk(1000)
 				.reader(this.readerTrade(data))
 				.writer(new TradesWriter(data))
+				.listener(lis)
 				.build();
 	}
 
 	@Bean
-	public Step step4(DataSource data) {
+	public Step step4(DataSource data,StepListener lis) {
 		return stepBuilderFactory.get("escribiendo")
 				.tasklet(new TaskletStep(data))
+				.listener(lis)
 				.build();
 	}
 
 	@Bean
-	public Job TradesJob(JobListener listener, Step step1, DataSource data) {
+	public Job TradesJob(JobListener listener, Step step1, DataSource data,StepListener lis) {
 		// ejecutar steps en paralelo
-		Flow rfqStep = new FlowBuilder<Flow>("rfqStep").start(step2(data)).build();
-		Flow tradeStep = new FlowBuilder<Flow>("tradeStep").start(step3(data)).build();
+		Flow rfqStep = new FlowBuilder<Flow>("rfqStep").start(step2(data,lis)).build();
+		Flow tradeStep = new FlowBuilder<Flow>("tradeStep").start(step3(data,lis )).build();
 		Flow carga = new FlowBuilder<Flow>("carga").start(step1).build();
 		//Ejecucion de hilos en paralelo
 		Flow rfqtradeFlow = new FlowBuilder<Flow>("rfqtradeFlow")
@@ -244,7 +249,7 @@ public class BatchConfig  {
 		return jobBuilderFactory.get("TradesJob").incrementer(new RunIdIncrementer()).listener(listener)
 				.start(carga)
 				.next(rfqtradeFlow)
-				.next(this.step4(data))
+				.next(this.step4(data,lis))
 				.end()
 				.build();
 	}

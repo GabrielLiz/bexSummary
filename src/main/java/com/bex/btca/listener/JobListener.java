@@ -27,8 +27,16 @@ public class JobListener implements JobExecutionListener{
 	
 	@Override
 	public void afterJob(JobExecution jobExecution) {
+		if(jobExecution.getStatus()==BatchStatus.FAILED) {
+			Window.text.setText(Window.text.getText()+ "\n " +"Ha fallado pongase en contacto con el tecnico");
+
+		}
 		if(jobExecution.getStatus()==BatchStatus.COMPLETED) {
-			Window.text.setText("Finalizado");
+			Window.text.setText(Window.text.getText()+ "\n " +"Finalizado");
+			Window.ejecutar.setEnabled(true);
+		}
+		if(jobExecution.getStatus()==BatchStatus.STARTING) {
+			Window.text.setText("Analizando....");
 		}
 	}
 
@@ -37,7 +45,9 @@ public class JobListener implements JobExecutionListener{
 	@Override
 	public void beforeJob(JobExecution jobExecution) {
 		if(jobExecution.getStatus()==BatchStatus.STARTED) {
+			Window.text.setText(" Iniciando...");
 		}
+	
 
 	}
 
