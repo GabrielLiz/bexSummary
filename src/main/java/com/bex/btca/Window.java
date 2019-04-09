@@ -21,6 +21,7 @@ public class Window extends JFrame implements ActionListener{
 	
 	public static JTextArea text;
 	public static JButton ejecutar;
+
 	public static void main(String[] args) {
 			Window a =new Window();
 			a.start();
@@ -45,7 +46,7 @@ public class Window extends JFrame implements ActionListener{
         panel.add(text);
         setContentPane(panel);
         setTitle("Estadisticass");
-        setSize(450, 300);
+        setSize(450, 350);
         setLocationRelativeTo(null);
         setVisible(true);
         setDefaultCloseOperation(EXIT_ON_CLOSE);

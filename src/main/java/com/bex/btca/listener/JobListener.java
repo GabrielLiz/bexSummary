@@ -1,7 +1,5 @@
 package com.bex.btca.listener;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.BatchStatus;
 import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.JobExecutionListener;
@@ -14,9 +12,7 @@ import com.bex.btca.Window;
 @Component
 public class JobListener implements JobExecutionListener{
 	
-	private static final Logger LOG = LoggerFactory.getLogger(JobListener.class);
 	
-	private JdbcTemplate jdbctemplate;
 
 	@Autowired
 	public JobListener(JdbcTemplate jdbctemplate) {
@@ -31,8 +27,7 @@ public class JobListener implements JobExecutionListener{
 			Window.text.setText(Window.text.getText()+ "\n " +"Ha fallado pongase en contacto con el tecnico");
 
 		}
-		if(jobExecution.getStatus()==BatchStatus.COMPLETED) {
-			Window.text.setText(Window.text.getText()+ "\n " +"Finalizado");
+		if(jobExecution.getStatus()==BatchStatus.COMPLETED) {Window.text.setText(Window.text.getText()+ "\n " +"Finalizado"+"\n Cerrar la ventana antes de volver a ejecutar");
 			Window.ejecutar.setEnabled(true);
 		}
 		if(jobExecution.getStatus()==BatchStatus.STARTING) {

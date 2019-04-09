@@ -28,7 +28,7 @@ public class TradesWriter implements ItemWriter<Totales> {
 	private HashMap<String, Integer> horasDelDia = new HashMap<String, Integer>();
 
 	private JdbcTemplate jdbctemplate;
-	private String regexUM = "^(([a-zA-Z0-9]{2})-(\\d{1})-([A-Z0-9]{9}))";
+	private String regexUM = "([a-zA-Z0-9]{2}\\-\\d{1}\\-[A-Z0-9]{9}\\.\\d{1}\\.[F]\\:\\d\\:\\d)|([a-zA-Z0-9]{2}\\-\\d{1}\\-[A-Z0-9]{9})";
 	private String regexEQC = "^([a-zA-Z0-9]{16})|^([a-zA-Z:\\-0-9]+.(2019|2018))";
 	private String BBG_360T = "^[8][0-9]+_[01]";
 	private String SBP = "^(([a-zA-Z0-9]*)(?:[-]))+[a-zA-Z0-9]*_[012]";
@@ -94,6 +94,8 @@ public class TradesWriter implements ItemWriter<Totales> {
 		if (matcherUM.find()) {
 			if (parts[0].equals("01")) {
 				return "UM";
+			}else {
+				return "UM*";
 			}
 		}
 		
@@ -101,7 +103,7 @@ public class TradesWriter implements ItemWriter<Totales> {
 		Pattern patternSBP = Pattern.compile(SBP);
 		Matcher matcherSBP = patternSBP.matcher(texts.toString());
 		if (matcherSBP.find()) {
-				return "UM";
+				return "SBP";
 		}
 
 		/// BUSQUEDA 360 y BBG FXAL

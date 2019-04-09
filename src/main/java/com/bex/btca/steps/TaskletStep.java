@@ -214,8 +214,6 @@ public class TaskletStep implements Tasklet {
 			}
 			
 		}
-		
-		
 		return resultadoTrade;
 
 	}

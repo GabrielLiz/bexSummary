@@ -32,7 +32,7 @@ public class StepListener implements StepExecutionListener {
 			ecri="Procesando Trades";
 		}
 		if(stepExecution.getStepName().equals("escribiendo")) {
-			ecri="Generando ficheros en C:/CSV/";
+			ecri="Generando ficheros en C:/CSV";
 		}
 		
 		Window.text.setText(Window.text.getText()+ "\n " +ecri);
