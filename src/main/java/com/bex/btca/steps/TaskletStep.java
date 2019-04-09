@@ -89,8 +89,14 @@ public class TaskletStep implements Tasklet {
 
 	public void fileName() {
 		File[] files = new File("/CSV/").listFiles();
-		String valu = files[0].getName();
-		fileName= valu.split("_")[0];
+		for (int i = 0; i < files.length; i++) {
+			String[] values = files[i].getName().split("_");
+			if(values.length==2) {
+				if (values[1].equals("total.csv")) {
+					fileName = values[0];
+				}
+			}
+		}
 		
 	}
 	public void writeRFQ(StringBuilder dato) {
