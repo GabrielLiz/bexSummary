@@ -58,11 +58,10 @@ public class Window extends JFrame implements ActionListener{
 		if(e.getSource()==ejecutar) {
 			ejecutar.setEnabled(false);
 			new Thread(new Runnable() {
-				
 				@Override
 				public void run() {
-					SpringApplication.run(BtcaApplication.class);
-					
+					String []args= {"hola","casa"};
+					SpringApplication.run(BtcaApplication.class,args);
 				}
 			}).start();
 		}

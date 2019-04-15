@@ -31,7 +31,7 @@ public class TradeProcesor implements ItemProcessor<Totales, EstadisticasRFQ> {
 				horasDelDia.put(valueIndex, v = v + 1);
 			}
 
-		EstadisticasRFQ esta= new EstadisticasRFQ(null);
+		EstadisticasRFQ esta= new EstadisticasRFQ(null,null);
 		
 		return null;
 	}

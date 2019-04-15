@@ -12,46 +12,47 @@ import org.springframework.stereotype.Component;
 import com.bex.btca.Window;
 
 @Component
-public class JobListener implements JobExecutionListener{
-	
-	private static final Logger LOG = LoggerFactory.getLogger(JobListener.class);
+public class JobListener implements JobExecutionListener {
 
+	private static final Logger LOG = LoggerFactory.getLogger(JobListener.class);
 
 	@Autowired
 	public JobListener(JdbcTemplate jdbctemplate) {
 		super();
+
 	}
-	
-	
-	
+
 	@Override
 	public void afterJob(JobExecution jobExecution) {
-		
-		if(jobExecution.getStatus()==BatchStatus.FAILED) {
-			Window.text.setText(Window.text.getText()+ "\n " +"Ha fallado pongase en contacto con el tecnico");
+		String value = null;
+
+		if (jobExecution.getStatus() == BatchStatus.FAILED) {
+			value = "\n " + "Ha fallado pongase en contacto con el tecnico";
 		}
-		if(jobExecution.getStatus()==BatchStatus.UNKNOWN) {
-			Window.text.setText(Window.text.getText()+ "\n " +"Ha fallado pongase en contacto con el tecnico");
+		if (jobExecution.getStatus() == BatchStatus.UNKNOWN) {
+			value = "\n " + "Ha fallado pongase en contacto con el tecnico";
 		}
-		if(jobExecution.getStatus()==BatchStatus.ABANDONED) {
-			Window.text.setText(Window.text.getText()+ "\n " +"Ha fallado pongase en contacto con el tecnico");
+		if (jobExecution.getStatus() == BatchStatus.ABANDONED) {
+			value = "\n " + "Ha fallado pongase en contacto con el tecnico";
 		}
-		if(jobExecution.getStatus()==BatchStatus.COMPLETED) {Window.text.setText(Window.text.getText()+ "\n " +"Finalizado"+"\n Cerrar la ventana antes de volver a ejecutar");
+		if (jobExecution.getStatus() == BatchStatus.COMPLETED) {
+			value= "\n " + "Finalizado" + "\n Cerrar la ventana antes de volver a ejecutar";
 			Window.ejecutar.setEnabled(true);
 		}
-		if(jobExecution.getStatus()==BatchStatus.STARTING) {
-			Window.text.setText("Analizando....");
+		if (jobExecution.getStatus() == BatchStatus.STARTING) {
+			value = "Analizando....";
 		}
+
+		Window.text.setText(Window.text.getText() + "\n " + value);
 	}
-
-
 
 	@Override
 	public void beforeJob(JobExecution jobExecution) {
-		if(jobExecution.getStatus()==BatchStatus.STARTED) {
+		
+		jobExecution.getExecutionContext();
+		if (jobExecution.getStatus() == BatchStatus.STARTED) {
 			Window.text.setText(" Iniciando...");
 		}
-	
 
 	}
 

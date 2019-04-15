@@ -28,7 +28,7 @@ public class RFQprocessor implements ItemProcessor<Totales, EstadisticasRFQ> {
 	public String EQDL_BTCA_ORDER = "^BBVAEQDL_BTCA_ORDER_\\d{8}";
 	public String EQDL_BTCA_PLACEMENT = "^BBVAEQDL_BTCA_PLACEMENT_\\d{8}";
 	// SBP
-	public String SBP_BTCA_RFQ = "^SBP_BTCA_RFQ_\\d{8}";
+	public String SBP_BTCA_RFQ = "^BBVASBP_BTCA_RFQ_\\d{8}";
 
 	ArrayList<String> listaRFQ;
 
@@ -57,20 +57,20 @@ public class RFQprocessor implements ItemProcessor<Totales, EstadisticasRFQ> {
 	public EstadisticasRFQ process(Totales item) throws Exception {
 		String va = null;
 		for (String string : listaRFQ) {
-			va = regexFind(string, item.getVersion(), item.getStatus(), "F " + item.getFecha_operativa());
+			va = regexFind(string, item.getVersion(), item.getStatus());
 			if (va != null) {
-				return new EstadisticasRFQ(va);
+				return new EstadisticasRFQ(va, "F " + item.getFecha_operativa());
 			}
 		}
 		return null;
 	}
 
-	public String regexFind(String regex, String text, String tex2, String tex3) {
+	public String regexFind(String regex, String text, String tex2) {
 		// REGEX that matches 1 or more white space
 		Pattern patternOp = Pattern.compile(regex);
 		Matcher matcherOp = patternOp.matcher(text);
 		if (matcherOp.find()) {
-			return matcherOp.group() + ";" + tex2 + ";" + tex3;
+			return matcherOp.group() + ";" + tex2;
 		}
 		return null;
 	}

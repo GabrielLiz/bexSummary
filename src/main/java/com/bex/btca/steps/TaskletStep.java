@@ -58,29 +58,30 @@ public class TaskletStep implements Tasklet {
 		super();
 		this.jdbctemplate = new JdbcTemplate(data);
 
-
 	}
 
 	@Override
 	public RepeatStatus execute(StepContribution contribution, ChunkContext chunkContext) throws Exception {
-		 resultadoRFQ= new StringBuilder();
-		 fileName();
-		
+		resultadoRFQ = new StringBuilder();
+		fileName();
+
 		String sql = "SELECT * FROM trade";
-		List<EstadisticasTrade> fulldata = jdbctemplate.query(sql, new BeanPropertyRowMapper<EstadisticasTrade>(EstadisticasTrade.class));
-	
+		List<EstadisticasTrade> fulldata = jdbctemplate.query(sql,
+				new BeanPropertyRowMapper<EstadisticasTrade>(EstadisticasTrade.class));
 
 		List<String> fechaOpe = jdbctemplate.queryForList("SELECT DISTINCT version from rfq", String.class);
-	//	List<String> horadesbida = jdbctemplate.queryForList("SELECT DISTINCT sent from btca  WHERE version=''", String.class);
-	//List<String> fechaOpeTrade = jdbctemplate.queryForList("SELECT DISTINCT fecha_operativa from btca WHERE version=''", String.class);
+		// List<String> horadesbida = jdbctemplate.queryForList("SELECT DISTINCT sent
+		// from btca WHERE version=''", String.class);
+		// List<String> fechaOpeTrade = jdbctemplate.queryForList("SELECT DISTINCT
+		// fecha_operativa from btca WHERE version=''", String.class);
 
-		
 		for (String stringst : fechaOpe) {
-			int i=jdbctemplate.queryForObject("SELECT COUNT(version) FROM rfq WHERE version='"+stringst+"'", Integer.class);
-				resultadoRFQ.append(stringst+";"+i +System.getProperty("line.separator"));
+			int i = jdbctemplate.queryForObject("SELECT COUNT(version) FROM rfq WHERE version='" + stringst + "'",
+					Integer.class);
+			resultadoRFQ.append(stringst + ";" + i + System.getProperty("line.separator"));
 		}
 
-		//	resul.append(Trades(horadesbida, fechaOpeTrade));
+		// resul.append(Trades(horadesbida, fechaOpeTrade));
 
 		writeRFQ(resultadoRFQ);
 		writeTrade(fulldata);
@@ -91,23 +92,24 @@ public class TaskletStep implements Tasklet {
 		File[] files = new File("/CSV/").listFiles();
 		for (int i = 0; i < files.length; i++) {
 			String[] values = files[i].getName().split("_");
-			if(values.length==2) {
+			if (values.length == 2) {
 				if (values[1].equals("total.csv")) {
 					fileName = values[0];
 				}
 			}
 		}
-		
+
 	}
+
 	public void writeRFQ(StringBuilder dato) {
-		File file = new File("/CSV/"+fileName+"_rfq.csv");
+		File file = new File("/CSV/" + fileName + "_rfq.csv");
 
 		FileWriter fr = null;
 		BufferedWriter br = null;
 		try {
 			fr = new FileWriter(file);
 			br = new BufferedWriter(fr);
-			br.write("Plataforma;Status;fecha de operativa;total" + System.getProperty("line.separator"));
+			br.write("Plataforma;Status;total" + System.getProperty("line.separator"));
 			br.write(dato.toString());
 			/*
 			 * for (String fecha : fechaOpe) { br.write(fecha+
@@ -127,18 +129,20 @@ public class TaskletStep implements Tasklet {
 			}
 		}
 	}
-	
-	public void writeTrade(	List<EstadisticasTrade> dato) {
-		File file = new File("/CSV/"+fileName+"_Trade.csv");
+
+	public void writeTrade(List<EstadisticasTrade> dato) {
+		File file = new File("/CSV/" + fileName + "_Trade.csv");
 
 		FileWriter fr = null;
 		BufferedWriter br = null;
 		try {
 			fr = new FileWriter(file);
 			br = new BufferedWriter(fr);
-			br.write("Status;fecha de operativa;asset;posiblemente;subido;total" + System.getProperty("line.separator"));
+			br.write(
+					"Status;fecha de operativa;asset;posiblemente;subido;total" + System.getProperty("line.separator"));
 			for (EstadisticasTrade estadisticasTrade : dato) {
-				br.write(estadisticasTrade.getBusqueda()+";"+Integer.toString(estadisticasTrade.getValores())+ System.getProperty("line.separator"));
+				br.write(estadisticasTrade.getBusqueda() + ";" + Integer.toString(estadisticasTrade.getValores())
+						+ System.getProperty("line.separator"));
 			}
 			/*
 			 * for (String fecha : fechaOpe) { br.write(fecha+
@@ -160,26 +164,29 @@ public class TaskletStep implements Tasklet {
 	}
 
 	public StringBuilder RFQs(List<String> fecha_operativa, String version) {
-		
+
 		StringBuilder resultado = new StringBuilder();
 		resultado.append("Las RFQ de " + version + " \n");
 
 		for (String fecha : fecha_operativa) {
-			String SQL_ACEPTED = "SELECT COUNT (version) FROM btca WHERE status='Accepted' AND fecha_operativa ='"+ fecha + "' AND version LIKE '%" + version + "%'";
-			String SQL_REJECTED = "SELECT COUNT (version) FROM btca WHERE status='Rejected' AND fecha_operativa ='"+ fecha + "' AND version LIKE '%" + version + "%'";
-			String SQL_SENT = "SELECT COUNT (version) FROM btca WHERE status='Sent' AND fecha_operativa ='" + fecha+ "' AND version LIKE '%" + version + "%'";
+			String SQL_ACEPTED = "SELECT COUNT (version) FROM btca WHERE status='Accepted' AND fecha_operativa ='"
+					+ fecha + "' AND version LIKE '%" + version + "%'";
+			String SQL_REJECTED = "SELECT COUNT (version) FROM btca WHERE status='Rejected' AND fecha_operativa ='"
+					+ fecha + "' AND version LIKE '%" + version + "%'";
+			String SQL_SENT = "SELECT COUNT (version) FROM btca WHERE status='Sent' AND fecha_operativa ='" + fecha
+					+ "' AND version LIKE '%" + version + "%'";
 
 			int accept = jdbctemplate.queryForObject(SQL_ACEPTED, Integer.class);
 			int rejected = jdbctemplate.queryForObject(SQL_REJECTED, Integer.class);
 			int sent = jdbctemplate.queryForObject(SQL_SENT, Integer.class);
 
 			if (accept > 0 || rejected > 0 || sent > 0) {
-				resultado.append(fecha+System.getProperty("line.separator"));
-				resultado.append("Status; number; asset"+ System.getProperty("line.separator"));
-				resultado.append("Aceptado;"+accept + ";"+ System.getProperty("line.separator"));
-				resultado.append("Rejected;"+rejected + ";"+ System.getProperty("line.separator"));
-				resultado.append("Sent;"+sent + ";"+ System.getProperty("line.separator"));
-				resultado.append("Total;=SUMA() "+ System.getProperty("line.separator"));
+				resultado.append(fecha + System.getProperty("line.separator"));
+				resultado.append("Status; number; asset" + System.getProperty("line.separator"));
+				resultado.append("Aceptado;" + accept + ";" + System.getProperty("line.separator"));
+				resultado.append("Rejected;" + rejected + ";" + System.getProperty("line.separator"));
+				resultado.append("Sent;" + sent + ";" + System.getProperty("line.separator"));
+				resultado.append("Total;=SUMA() " + System.getProperty("line.separator"));
 
 			}
 		}
@@ -189,39 +196,40 @@ public class TaskletStep implements Tasklet {
 	}
 
 	public StringBuilder Trades(List<String> HoraDeSubida, List<String> fecha_operativa) {
-		StringBuilder resultadoTrade=new StringBuilder();
-		String fecha=null;
-		String hora=null;
+		StringBuilder resultadoTrade = new StringBuilder();
+		String fecha = null;
+		String hora = null;
 		resultadoTrade.append("****************************TRADES*********************************");
 		resultadoTrade.append(System.getProperty("line.separator"));
 
-		for (int i=0;i<fecha_operativa.size();i++) {
-			fecha=fecha_operativa.get(i);
+		for (int i = 0; i < fecha_operativa.size(); i++) {
+			fecha = fecha_operativa.get(i);
 
-			for (int e=0;e<HoraDeSubida.size();e++) {
-				hora=HoraDeSubida.get(e);
+			for (int e = 0; e < HoraDeSubida.size(); e++) {
+				hora = HoraDeSubida.get(e);
 
-				
-				String  SQL_ACEPTED = "SELECT COUNT (version) FROM btca WHERE status='Accepted' AND fecha_operativa ='"+fecha+"' AND version ='' AND sent ='"+hora+"'";
-				String  SQL_REJECTED = "SELECT COUNT (version) FROM btca WHERE status='Rejected' AND fecha_operativa ='"+fecha+"' AND version ='' AND sent ='"+hora+"'";
-				String  SQL_SENT = "SELECT COUNT (version) FROM btca WHERE status='Sent' AND fecha_operativa ='"+fecha+"' AND version ='' AND sent ='"+hora+"'";
+				String SQL_ACEPTED = "SELECT COUNT (version) FROM btca WHERE status='Accepted' AND fecha_operativa ='"
+						+ fecha + "' AND version ='' AND sent ='" + hora + "'";
+				String SQL_REJECTED = "SELECT COUNT (version) FROM btca WHERE status='Rejected' AND fecha_operativa ='"
+						+ fecha + "' AND version ='' AND sent ='" + hora + "'";
+				String SQL_SENT = "SELECT COUNT (version) FROM btca WHERE status='Sent' AND fecha_operativa ='" + fecha
+						+ "' AND version ='' AND sent ='" + hora + "'";
 
-				int accept =	jdbctemplate.queryForObject(SQL_ACEPTED, Integer.class);
-				int rejected =	jdbctemplate.queryForObject(SQL_REJECTED, Integer.class);
-				int sent =	jdbctemplate.queryForObject(SQL_SENT, Integer.class);
-				
-				if (accept>0||rejected>0||sent>0) {
-					resultadoTrade.append(fecha+" "+hora+System.getProperty("line.separator"));
-					resultadoTrade.append("Aceptados;"+accept+System.getProperty("line.separator"));
-					resultadoTrade.append("Rejected;"+rejected+System.getProperty("line.separator"));
-					resultadoTrade.append("Sent;"+sent+System.getProperty("line.separator"));
-					resultadoTrade.append("Total;=SUMA() "+ System.getProperty("line.separator"));
+				int accept = jdbctemplate.queryForObject(SQL_ACEPTED, Integer.class);
+				int rejected = jdbctemplate.queryForObject(SQL_REJECTED, Integer.class);
+				int sent = jdbctemplate.queryForObject(SQL_SENT, Integer.class);
 
+				if (accept > 0 || rejected > 0 || sent > 0) {
+					resultadoTrade.append(fecha + " " + hora + System.getProperty("line.separator"));
+					resultadoTrade.append("Aceptados;" + accept + System.getProperty("line.separator"));
+					resultadoTrade.append("Rejected;" + rejected + System.getProperty("line.separator"));
+					resultadoTrade.append("Sent;" + sent + System.getProperty("line.separator"));
+					resultadoTrade.append("Total;=SUMA() " + System.getProperty("line.separator"));
 
 				}
-			
+
 			}
-			
+
 		}
 		return resultadoTrade;
 

@@ -1,6 +1,7 @@
 package com.bex.btca.batch;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -33,6 +34,7 @@ import org.springframework.batch.item.file.transform.BeanWrapperFieldExtractor;
 import org.springframework.batch.item.file.transform.DelimitedLineAggregator;
 import org.springframework.batch.item.file.transform.DelimitedLineTokenizer;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.FileSystemResource;
@@ -42,6 +44,7 @@ import org.springframework.core.io.support.ResourcePatternResolver;
 import org.springframework.core.task.SimpleAsyncTaskExecutor;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
+import org.springframework.stereotype.Component;
 
 import com.bex.btca.listener.JobListener;
 import com.bex.btca.listener.StepListener;
@@ -69,16 +72,13 @@ public class BatchConfig  {
 		super();
 
 	}
-	public void gello() {
-
-	}
 
 	///////////////// READERS //////////////////
 	@Bean
 	public FlatFileItemReader<Trade> readerCarga() {
 		FlatFileItemReader<Trade> reader = new FlatFileItemReader<Trade>();
 		reader.setLinesToSkip(1);
-		//reader.setResource(new FileSystemResource("C:/CSV/total.csv"));
+		// reader.setResource(new FileSystemResource("C:/CSV/total.csv"));
 
 		reader.setLineMapper(new DefaultLineMapper<Trade>() {
 			{
@@ -108,12 +108,9 @@ public class BatchConfig  {
 
 	@Bean
 	JdbcPagingItemReader<Totales> readerRfq(DataSource dataSource) {
-		PagingQueryProvider provider= createQueryProvider("SELECT *","FROM btca","WHERE version !=''");
-		JdbcPagingItemReader<Totales> databaseReader =  new JdbcPagingItemReaderBuilder<Totales>()
-			.name("tratamientoRFQ")
-				.dataSource(dataSource)
-				.rowMapper(new BeanPropertyRowMapper<>(Totales.class))
-				.queryProvider(provider)
+		PagingQueryProvider provider = createQueryProvider("SELECT *", "FROM btca", "WHERE version !=''");
+		JdbcPagingItemReader<Totales> databaseReader = new JdbcPagingItemReaderBuilder<Totales>().name("tratamientoRFQ")
+				.dataSource(dataSource).rowMapper(new BeanPropertyRowMapper<>(Totales.class)).queryProvider(provider)
 				.build();
 
 		return databaseReader;
@@ -121,12 +118,11 @@ public class BatchConfig  {
 
 	@Bean
 	JdbcPagingItemReader<Totales> readerTrade(DataSource dataSource) {
-		PagingQueryProvider provider= createQueryProvider("SELECT *","FROM btca","WHERE version ='' AND id_trans !=''");
-		JdbcPagingItemReader<Totales> databaseReader =  new JdbcPagingItemReaderBuilder<Totales>()
-				.name("readerTrade")
-				.dataSource(dataSource)
-				.rowMapper(new BeanPropertyRowMapper<>(Totales.class))
-				.queryProvider(provider)
+		
+		PagingQueryProvider provider = createQueryProvider("SELECT *", "FROM btca",
+				"WHERE version ='' AND id_trans !=''");
+		JdbcPagingItemReader<Totales> databaseReader = new JdbcPagingItemReaderBuilder<Totales>().name("readerTrade")
+				.dataSource(dataSource).rowMapper(new BeanPropertyRowMapper<>(Totales.class)).queryProvider(provider)
 				.build();
 
 		return databaseReader;
@@ -140,7 +136,7 @@ public class BatchConfig  {
 		return new BTCAprocessor();
 	}
 
-	//fuera de uso
+	// fuera de uso
 	@Bean
 	public RFQprocessor rfqProcessor() {
 
@@ -152,22 +148,22 @@ public class BatchConfig  {
 	public FlatFileItemWriter<EstadisticasRFQ> writeTrade() {
 
 		FlatFileItemWriter<EstadisticasRFQ> writer = new FlatFileItemWriter<EstadisticasRFQ>();
-    	writer.setResource(new FileSystemResource("/CSV/Trades.csv"));
-    	BeanWrapperFieldExtractor<EstadisticasRFQ> fieldExtractor = new BeanWrapperFieldExtractor<EstadisticasRFQ>();
+		writer.setResource(new FileSystemResource("/CSV/Trades.csv"));
+		BeanWrapperFieldExtractor<EstadisticasRFQ> fieldExtractor = new BeanWrapperFieldExtractor<EstadisticasRFQ>();
 
-
-    	writer.setLineAggregator(new DelimitedLineAggregator<EstadisticasRFQ>() {
-            {
-                setDelimiter(";");
-                setFieldExtractor(new BeanWrapperFieldExtractor<EstadisticasRFQ>() {
-                    {
-                        setNames(new String[] { "BBVAEQC" });
-                    }
-                });
-            }
-        });
-        return writer;
+		writer.setLineAggregator(new DelimitedLineAggregator<EstadisticasRFQ>() {
+			{
+				setDelimiter(";");
+				setFieldExtractor(new BeanWrapperFieldExtractor<EstadisticasRFQ>() {
+					{
+						setNames(new String[] { "BBVAEQC" });
+					}
+				});
+			}
+		});
+		return writer;
 	}
+
 	@Bean
 	public JdbcBatchItemWriter<Totales> writeCarga(DataSource datasource) {
 		return new JdbcBatchItemWriterBuilder<Totales>()
@@ -180,8 +176,7 @@ public class BatchConfig  {
 	public JdbcBatchItemWriter<EstadisticasRFQ> writerRfq(DataSource datasource) {
 		return new JdbcBatchItemWriterBuilder<EstadisticasRFQ>()
 				.itemSqlParameterSourceProvider(new BeanPropertyItemSqlParameterSourceProvider<EstadisticasRFQ>())
-				.sql("INSERT INTO rfq (version) VALUES (:version)")
-				.dataSource(datasource).build();
+				.sql("INSERT INTO rfq (version) VALUES (:version)").dataSource(datasource).build();
 	}
 
 //////////////////////////////////////STEPS////////////////////////////////////////////////////////////////////
@@ -192,12 +187,9 @@ public class BatchConfig  {
 		taskExecutor.setCorePoolSize(6);
 		taskExecutor.setMaxPoolSize(6);
 		taskExecutor.afterPropertiesSet();
-		return stepBuilderFactory.get("carga").<Trade, Totales>chunk(1000)
-				.reader(this.readerMultiResource())
-				.processor(this.processor())
-				.writer(this.writeCarga(datasource))
-				.listener(lis)
-				//.taskExecutor(taskExecutor) velocidad de multi hilo
+		return stepBuilderFactory.get("carga").<Trade, Totales>chunk(1000).reader(this.readerMultiResource())
+				.processor(this.processor()).writer(this.writeCarga(datasource)).listener(lis)
+				// .taskExecutor(taskExecutor) velocidad de multi hilo
 				.build();
 	}
 
@@ -205,58 +197,39 @@ public class BatchConfig  {
 	public Step step2(DataSource data, StepListener lis) {
 
 		return stepBuilderFactory.get("RFQs")
-				//.tasklet(new TaskletStep(data))
-				.<Totales, EstadisticasRFQ>chunk(1000)
-				.reader(this.readerRfq(data))
-				.processor(new RFQprocessor())
-				.writer(this.writerRfq(data))
-				.listener(lis)
-				.build();
+				// .tasklet(new TaskletStep(data))
+				.<Totales, EstadisticasRFQ>chunk(1000).reader(this.readerRfq(data)).processor(new RFQprocessor())
+				.writer(this.writerRfq(data)).listener(lis).build();
 	}
 
 	@Bean
-	public Step step3(DataSource data,StepListener lis) {
-		return stepBuilderFactory.get("PostTrade")
-				.<Totales, Totales>chunk(1000)
-				.reader(this.readerTrade(data))
-				.writer(new TradesWriter(data))
-				.listener(lis)
-				.build();
+	public Step step3(DataSource data, StepListener lis) {
+
+		return stepBuilderFactory.get("PostTrade").<Totales, Totales>chunk(1000).reader(this.readerTrade(data))
+				.writer(new TradesWriter(data)).listener(lis).build();
 	}
 
 	@Bean
-	public Step step4(DataSource data,StepListener lis) {
-		return stepBuilderFactory.get("escribiendo")
-				.tasklet(new TaskletStep(data))
-				.listener(lis)
-				.build();
+	public Step step4(DataSource data, StepListener lis) {
+		return stepBuilderFactory.get("escribiendo").tasklet(new TaskletStep(data)).listener(lis).build();
 	}
 
 	@Bean
-	public Job TradesJob(JobListener listener, Step step1, DataSource data,StepListener lis) {
+	public Job TradesJob(JobListener listener, Step step1, DataSource data, StepListener lis) {
 		// ejecutar steps en paralelo
-		Flow rfqStep = new FlowBuilder<Flow>("rfqStep").start(step2(data,lis)).build();
-		Flow tradeStep = new FlowBuilder<Flow>("tradeStep").start(step3(data,lis )).build();
+		Flow rfqStep = new FlowBuilder<Flow>("rfqStep").start(step2(data, lis)).build();
+		Flow tradeStep = new FlowBuilder<Flow>("tradeStep").start(step3(data, lis)).build();
 		Flow carga = new FlowBuilder<Flow>("carga").start(step1).build();
-		//Ejecucion de hilos en paralelo
-		Flow rfqtradeFlow = new FlowBuilder<Flow>("rfqtradeFlow")
-				.start(rfqStep)
-				.split(new SimpleAsyncTaskExecutor())
-				.add(tradeStep)
-				.build();
-
-
-		return jobBuilderFactory.get("TradesJob").incrementer(new RunIdIncrementer()).listener(listener)
-				.start(carga)
-				.next(rfqtradeFlow)
-				.next(this.step4(data,lis))
-				.end()
-				.build();
+		// Ejecucion de hilos en paralelo
+		Flow rfqtradeFlow = new FlowBuilder<Flow>("rfqtradeFlow").start(rfqStep).split(new SimpleAsyncTaskExecutor())
+				.add(tradeStep).build();
+		Job job = jobBuilderFactory.get("TradesJob").incrementer(new RunIdIncrementer()).listener(listener).start(carga)
+				.next(rfqtradeFlow).next(this.step4(data, lis)).end().build();
+		return job;
 	}
 
-
-	/////////////////////////////UTILS////////////////////////////////////
-	//paginacion y ordanamiento del queryProvider
+	///////////////////////////// UTILS////////////////////////////////////
+	// paginacion y ordanamiento del queryProvider
 	private PagingQueryProvider createQueryProvider(String select, String From, String Where) {
 		HsqlPagingQueryProvider queryProvider = new HsqlPagingQueryProvider();
 		queryProvider.setSelectClause(select);
@@ -273,7 +246,7 @@ public class BatchConfig  {
 		return sortConfiguration;
 	}
 
-	//deprecated
+	// deprecated
 	@Bean(destroyMethod = "")
 	public ItemReader<Totales> readerEstadisticas(DataSource datasource) {
 		JdbcCursorItemReader<Totales> reader = new JdbcCursorItemReader<Totales>();
@@ -285,18 +258,17 @@ public class BatchConfig  {
 
 	@Bean
 	public MultiResourceItemReader<Trade> readerMultiResource() {
-		 ResourcePatternResolver patternResolver = new PathMatchingResourcePatternResolver();
-		 Resource[] resources2 = null;
-		 	try {
-		 		resources2 = patternResolver.getResources("file:C:/CSV/*total.csv");
-		 	} catch(IOException e)
-		 	{
-		 		e.printStackTrace();
-			}
-		 	readers = new  MultiResourceItemReader<>();
-		 	readers.setResources(resources2);
-		 	readers.setDelegate(readerCarga());
-		 	return readers;
+		ResourcePatternResolver patternResolver = new PathMatchingResourcePatternResolver();
+		Resource[] resources2 = null;
+		try {
+			resources2 = patternResolver.getResources("file:C:/CSV/*total.csv");
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		readers = new MultiResourceItemReader<>();
+		readers.setResources(resources2);
+		readers.setDelegate(readerCarga());
+		return readers;
 
 	}
 }

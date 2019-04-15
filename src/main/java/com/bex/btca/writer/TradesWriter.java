@@ -31,7 +31,7 @@ public class TradesWriter implements ItemWriter<Totales> {
 	private String regexUM = "([a-zA-Z0-9]{2}\\-\\d{1}\\-[A-Z0-9]{9}\\.\\d{1}\\.[F]\\:\\d\\:\\d)|([a-zA-Z0-9]{2}\\-\\d{1}\\-[A-Z0-9]{9})";
 	private String regexEQC = "^([a-zA-Z0-9]{16})|^([a-zA-Z:\\-0-9]+.(2020|2019|2018))|^([0-9]+\\.[1234]\\.[0-9]+)$";
 	private String BBG_360T = "^[8][0-9]+_[01]";
-	private String SBP = "^(([a-zA-Z0-9]*)(?:[-]))+[a-zA-Z0-9]*_[012]";
+	private String SBP = "^([\\d]+_0.4.[RID]+_[a-zA-Z0-9]+)$";
 	private String RET = "^[0-9]+_[01].[0-9]+";
 
 	public TradesWriter(DataSource data) {
@@ -136,8 +136,6 @@ public class TradesWriter implements ItemWriter<Totales> {
 				if (minuto >= 30 && minuto < 60) {
 					return "RET";
 				}
-			} else {
-				return "RET*";
 			}
 		}
 
