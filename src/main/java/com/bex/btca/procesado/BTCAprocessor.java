@@ -1,6 +1,5 @@
 package com.bex.btca.procesado;
 
-import java.io.UnsupportedEncodingException;
 import java.math.BigInteger;
 import java.util.HashSet;
 import java.util.Set;

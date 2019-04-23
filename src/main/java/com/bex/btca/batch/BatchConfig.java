@@ -204,9 +204,15 @@ public class BatchConfig  {
 
 	@Bean
 	public Step step3(DataSource data, StepListener lis) {
-
+		ThreadPoolTaskExecutor taskExecutor = new ThreadPoolTaskExecutor();
+		taskExecutor.setCorePoolSize(6);
+		taskExecutor.setMaxPoolSize(6);
+		taskExecutor.afterPropertiesSet();
 		return stepBuilderFactory.get("PostTrade").<Totales, Totales>chunk(1000).reader(this.readerTrade(data))
-				.writer(new TradesWriter(data)).listener(lis).build();
+				.writer(new TradesWriter(data))
+			//	.listener(lis)
+			//	.taskExecutor(taskExecutor) 
+				.build();
 	}
 
 	@Bean

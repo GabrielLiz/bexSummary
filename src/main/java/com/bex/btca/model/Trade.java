@@ -766,7 +766,12 @@ public class Trade {
 	        result = 31 * result + getCentro().hashCode();
 	        result = 31 * result + getAssetClass().hashCode();
 	        result = 31 * result + getDivisadelprecio().hashCode();
+	        result = 31 * result + getDivisadelprecio().hashCode();
+	        result = 31 * result + getIDdecomprador().hashCode();
+	        result = 31 * result + getTipodevendedor().hashCode();
+	        result = 31 * result + getIDdevendedor().hashCode();
 
+	        
 		return result;
 	}
 

@@ -39,7 +39,6 @@ public class rfqWriter implements ItemWriter<Totales> {
 
 	@Override
 	public void write(List<? extends Totales> item) throws Exception {
-		Totales nums = new Totales();
 
 		for (Totales totales : item) {
 			for (String lista : listaRFQ) {

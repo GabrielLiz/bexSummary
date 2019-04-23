@@ -1,16 +1,9 @@
 package com.bex.btca.writer;
 
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.StringTokenizer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -19,6 +12,7 @@ import javax.sql.DataSource;
 import org.springframework.batch.item.ItemWriter;
 import org.springframework.batch.item.file.FlatFileItemWriter;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.RowMapper;
 
 import com.bex.btca.model.Totales;
 
@@ -44,28 +38,36 @@ public class TradesWriter implements ItemWriter<Totales> {
 	public void write(List<? extends Totales> item) throws Exception {
 
 		for (Totales totales : item) {
+			Integer i = 0;
 			String valueIndex = totales.getStatus() + ";" + "F " + totales.getFecha_operativa() + ";"
 					+ totales.getAssset_class() + ";" + regexFind(totales.getId_trans(), totales.getSent()) + ";"
 					+ totales.getSent();
-			if (horasDelDia.get(valueIndex) == null) {
-				horasDelDia.put(valueIndex, 1);
+		
+			List<Integer> strLst  = jdbctemplate.query("SELECT valores FROM trade WHERE busqueda='" + valueIndex.toString() + "'",new RowMapper<Integer>() {
 
-				jdbctemplate.update("INSERT INTO trade (busqueda, valores) VALUES (?,?)", valueIndex.toString(), 1);
+				@Override
+				public Integer mapRow(ResultSet rs, int rowNum) throws SQLException {
+					return rs.getInt(1);
+				}
+			});
+			
+			/*		
+			try {
+			i = jdbctemplate.queryForObject("SELECT valores FROM trade WHERE busqueda='" + valueIndex + "'",
+					Integer.class);
+			}catch (EmptyResultDataAccessException e) {
+				i=0;
+			}catch(IncorrectResultSizeDataAccessException e) {
+				i=0;
+			}*/
+			i =	strLst.size()==0 ? 1:strLst.get(0);
+			
+			if (strLst.size()==0) {
+				jdbctemplate.update("INSERT INTO trade (busqueda, valores) VALUES (?,?)", valueIndex, 1);
 
 			} else {
-				int v = horasDelDia.get(valueIndex);
-				// recupero el valor de la segunda lista recuperada que el valor que devuelve es
-				// un entero.
-				horasDelDia.put(valueIndex, v = v + 1);
+				jdbctemplate.update("UPDATE  trade SET valores = ? WHERE busqueda = ?", (i = i + 1), valueIndex);
 			}
-		}
-
-		for (Map.Entry<String, Integer> entry : horasDelDia.entrySet()) {
-			// jdbctemplate.update("UPDATE trade SET busqueda = '"+entry.getKey()+"',
-			// valores ='"+entry.getValue()+"' WHERE busqueda = '"+entry.getKey()+"'");
-			jdbctemplate.update("UPDATE  trade SET valores = ? WHERE busqueda = ?", entry.getValue(),
-					entry.getKey().toString());
-
 		}
 
 	}
@@ -94,8 +96,8 @@ public class TradesWriter implements ItemWriter<Totales> {
 		if (matcherUM.find()) {
 			if (parts[0].equals("01")) {
 				return "UM";
-			}else {
-				return "UM*";
+			} else {
+				return "UM *";
 			}
 		}
 
@@ -103,7 +105,7 @@ public class TradesWriter implements ItemWriter<Totales> {
 		Pattern patternSBP = Pattern.compile(SBP);
 		Matcher matcherSBP = patternSBP.matcher(texts.toString());
 		if (matcherSBP.find()) {
-				return "SBP";
+			return "SBP";
 		}
 
 		/// BUSQUEDA 360 y BBG FXAL

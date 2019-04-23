@@ -60,8 +60,7 @@ public class Window extends JFrame implements ActionListener{
 			new Thread(new Runnable() {
 				@Override
 				public void run() {
-					String []args= {"hola","casa"};
-					SpringApplication.run(BtcaApplication.class,args);
+					SpringApplication.run(BtcaApplication.class);
 				}
 			}).start();
 		}
