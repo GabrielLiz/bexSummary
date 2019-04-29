@@ -1,10 +1,5 @@
 package com.bex.btca.model;
 
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
-import org.springframework.core.style.ToStringCreator;
-
 public class Trade {
 
 	private String IDdetransacción;
@@ -592,6 +587,52 @@ public class Trade {
 	}
 
 
+
+
+	@Override
+	public String toString() {
+		return "Trade [" + (IDdetransacción != null ? "IDdetransacción=" + IDdetransacción + ", " : "")
+				+ (Version != null ? "Version=" + Version + ", " : "")
+				+ (Acción != null ? "Acción=" + Acción + ", " : "")
+				+ (Estatus != null ? "Estatus=" + Estatus + ", " : "")
+				+ (FeedProducer != null ? "FeedProducer=" + FeedProducer + ", " : "")
+				+ (Repetir != null ? "Repetir=" + Repetir + ", " : "") + (Razón != null ? "Razón=" + Razón + ", " : "")
+				+ (Descripcióndelvalor != null ? "Descripcióndelvalor=" + Descripcióndelvalor + ", " : "")
+				+ (ISIN != null ? "ISIN=" + ISIN + ", " : "") + (Enviado != null ? "Enviado=" + Enviado + ", " : "")
+				+ (Received != null ? "Received=" + Received + ", " : "")
+				+ (Tipodeoperación != null ? "Tipodeoperación=" + Tipodeoperación + ", " : "")
+				+ (TradeSubtype != null ? "TradeSubtype=" + TradeSubtype + ", " : "")
+				+ (TradingMode != null ? "TradingMode=" + TradingMode + ", " : "")
+				+ (TradingPlatform != null ? "TradingPlatform=" + TradingPlatform + ", " : "")
+				+ (TradingSystem != null ? "TradingSystem=" + TradingSystem + ", " : "")
+				+ (Capacity != null ? "Capacity=" + Capacity + ", " : "")
+				+ (Cantidad != null ? "Cantidad=" + Cantidad + ", " : "")
+				+ (Tipodecantidad != null ? "Tipodecantidad=" + Tipodecantidad + ", " : "")
+				+ (Precio != null ? "Precio=" + Precio + ", " : "")
+				+ (Divisadelprecio != null ? "Divisadelprecio=" + Divisadelprecio + ", " : "")
+				+ (PriceType != null ? "PriceType=" + PriceType + ", " : "")
+				+ (Centro != null ? "Centro=" + Centro + ", " : "")
+				+ (Fechadetransacción != null ? "Fechadetransacción=" + Fechadetransacción + ", " : "")
+				+ (AssetClass != null ? "AssetClass=" + AssetClass + ", " : "")
+				+ (OrderType != null ? "OrderType=" + OrderType + ", " : "")
+				+ (OrderAccountType != null ? "OrderAccountType=" + OrderAccountType + ", " : "")
+				+ (Costs != null ? "Costs=" + Costs + ", " : "") + (Rebates != null ? "Rebates=" + Rebates + ", " : "")
+				+ (LastCapacity != null ? "LastCapacity=" + LastCapacity + ", " : "")
+				+ (BestBid != null ? "BestBid=" + BestBid + ", " : "")
+				+ (BestOffer != null ? "BestOffer=" + BestOffer + ", " : "")
+				+ (IDdeejecutor != null ? "IDdeejecutor=" + IDdeejecutor + ", " : "")
+				+ (Tipodeejecutor != null ? "Tipodeejecutor=" + Tipodeejecutor + ", " : "")
+				+ (IDdecomprador != null ? "IDdecomprador=" + IDdecomprador + ", " : "")
+				+ (Tipodecomprador != null ? "Tipodecomprador=" + Tipodecomprador + ", " : "")
+				+ (IDdevendedor != null ? "IDdevendedor=" + IDdevendedor + ", " : "")
+				+ (Tipodevendedor != null ? "Tipodevendedor=" + Tipodevendedor + ", " : "")
+				+ (Últmensaje != null ? "Últmensaje=" + Últmensaje + ", " : "") + "procesado=" + procesado + "]";
+	}
+
+	
+	
+	
+	/*
 	@Override
 	public String toString() {
 		StringBuilder builder = new StringBuilder();
@@ -821,5 +862,5 @@ public class Trade {
 			total=31 * total+hashCode();
 			return total;
 	}
-	
+	*/
 }

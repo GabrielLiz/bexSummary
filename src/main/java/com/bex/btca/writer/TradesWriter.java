@@ -51,15 +51,6 @@ public class TradesWriter implements ItemWriter<Totales> {
 				}
 			});
 			
-			/*		
-			try {
-			i = jdbctemplate.queryForObject("SELECT valores FROM trade WHERE busqueda='" + valueIndex + "'",
-					Integer.class);
-			}catch (EmptyResultDataAccessException e) {
-				i=0;
-			}catch(IncorrectResultSizeDataAccessException e) {
-				i=0;
-			}*/
 			i =	strLst.size()==0 ? 1:strLst.get(0);
 			
 			if (strLst.size()==0) {
