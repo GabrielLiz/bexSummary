@@ -211,7 +211,7 @@ public class BatchConfig  {
 		return stepBuilderFactory.get("PostTrade").<Totales, Totales>chunk(1000).reader(this.readerTrade(data))
 				.writer(new TradesWriter(data))
 				.listener(lis)
-			//	.taskExecutor(taskExecutor) 
+				//.taskExecutor(taskExecutor) 
 				.build();
 	}
 
@@ -219,7 +219,8 @@ public class BatchConfig  {
 	public Step step4(DataSource data, StepListener lis) {
 		return stepBuilderFactory.get("escribiendo").tasklet(new TaskletStep(data)).listener(lis).build();
 	}
-
+	
+	//JOB
 	@Bean
 	public Job TradesJob(JobListener listener, Step step1, DataSource data, StepListener lis) {
 		// ejecutar steps en paralelo
@@ -261,7 +262,8 @@ public class BatchConfig  {
 		reader.setRowMapper(new BeanPropertyRowMapper<Totales>(Totales.class));
 		return reader;
 	}
-
+ 
+	// lectura de multiples ficheros
 	@Bean
 	public MultiResourceItemReader<Trade> readerMultiResource() {
 		ResourcePatternResolver patternResolver = new PathMatchingResourcePatternResolver();

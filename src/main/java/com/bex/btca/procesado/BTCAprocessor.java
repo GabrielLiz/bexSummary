@@ -19,7 +19,7 @@ public class BTCAprocessor implements ItemProcessor<Trade, Totales> {
 	String regexOperativa = "[0-9]{1,2}(/|-)[0-9]{1,2}(/|-)[0-9]{4}";
 	String regexSubida = "[0-9]{1,2}(:)[0-9]{1,2}";
 	private Set<Long> seenUsers = new HashSet<Long>();
-
+	private int borrado=0;
 	public BTCAprocessor() {
 		super();
 	}
@@ -28,7 +28,7 @@ public class BTCAprocessor implements ItemProcessor<Trade, Totales> {
 	public Totales process(Trade item) throws Exception {
 		Long value=new BigInteger(makeSHA1Hash(item.toString()), 16).longValue();
 		if (seenUsers.contains(value)) {
-			System.out.println(item.toString());
+			System.out.println(item.toString()+" "+(borrado+=1));
 			return null;
 			
 		} else {

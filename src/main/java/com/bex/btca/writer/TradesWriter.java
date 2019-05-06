@@ -65,6 +65,7 @@ public class TradesWriter implements ItemWriter<Totales> {
 
 	public String regexFind(String texts, String hor) {
 		// REGEX that matches 1 or more white space
+		try {
 		String[] parts = hor.split(Pattern.quote(":"));
 		int minuto = Integer.parseInt(parts[1]);
 		// Busqueda EQC
@@ -130,6 +131,10 @@ public class TradesWriter implements ItemWriter<Totales> {
 					return "RET";
 				}
 			}
+		}
+		}catch(Exception e) {
+			e.printStackTrace();
+			System.out.println(texts);
 		}
 
 		return "";
