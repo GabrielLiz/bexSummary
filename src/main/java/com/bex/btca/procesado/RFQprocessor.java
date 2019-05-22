@@ -24,6 +24,8 @@ public class RFQprocessor implements ItemProcessor<Totales, EstadisticasRFQ> {
 	public String FNC_BTCA_RFQ = "^BBVAFNC_BTCA_RFQ_\\d{8}";
 	// EQD
 	public String _FLOW = "^BBVAEQD_BTCA_RFQ_\\d{8}_FLOW";
+	public String EQD = "^BBVAEQD_BTCA_RFQ_\\d{8}";
+
 	// EQDL
 	public String EQDL_BTCA_ORDER = "^BBVAEQDL_BTCA_ORDER_\\d{8}";
 	public String EQDL_BTCA_PLACEMENT = "^BBVAEQDL_BTCA_PLACEMENT_\\d{8}";
@@ -45,6 +47,7 @@ public class RFQprocessor implements ItemProcessor<Totales, EstadisticasRFQ> {
 		listaRFQ.add(UM_BTCA_RFQ);
 		listaRFQ.add(FNC_BTCA_RFQ);
 		listaRFQ.add(_FLOW);
+		listaRFQ.add(EQD);
 		listaRFQ.add(EQDL_BTCA_ORDER);
 		listaRFQ.add(EQDL_BTCA_PLACEMENT);
 		listaRFQ.add(SBP_BTCA_RFQ);
@@ -56,6 +59,7 @@ public class RFQprocessor implements ItemProcessor<Totales, EstadisticasRFQ> {
 	@Override
 	public EstadisticasRFQ process(Totales item) throws Exception {
 		String va = null;
+		// devuelve null si no encontra el regex 
 		for (String string : listaRFQ) {
 			va = regexFind(string, item.getVersion(), item.getStatus());
 			if (va != null) {
@@ -64,7 +68,7 @@ public class RFQprocessor implements ItemProcessor<Totales, EstadisticasRFQ> {
 		}
 		return null;
 	}
-
+// Busca los regex de la lista
 	public String regexFind(String regex, String text, String tex2) {
 		// REGEX that matches 1 or more white space
 		Pattern patternOp = Pattern.compile(regex);

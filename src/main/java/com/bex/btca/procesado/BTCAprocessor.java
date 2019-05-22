@@ -16,8 +16,8 @@ import com.bex.btca.model.Trade;
 
 public class BTCAprocessor implements ItemProcessor<Trade, Totales> {
 
-	String regexOperativa = "[0-9]{1,2}(/|-)[0-9]{1,2}(/|-)[0-9]{4}";
-	String regexSubida = "[0-9]{1,2}(:)[0-9]{1,2}";
+	private String regexOperativa = "[0-9]{1,2}(/|-)[0-9]{1,2}(/|-)[0-9]{4}";
+	private String regexSubida = "[0-9]{1,2}(:)[0-9]{1,2}";
 	private Set<Long> seenUsers = new HashSet<Long>();
 	private int borrado=0;
 	public BTCAprocessor() {
@@ -26,8 +26,10 @@ public class BTCAprocessor implements ItemProcessor<Trade, Totales> {
 
 	@Override
 	public Totales process(Trade item) throws Exception {
+		// lo transforma en un valor Long
 		Long value=new BigInteger(makeSHA1Hash(item.toString()), 16).longValue();
 		if (seenUsers.contains(value)) {
+			// cuenta los valores eliminados.
 			System.out.println(item.toString()+" "+(borrado+=1));
 			return null;
 			
@@ -44,7 +46,7 @@ public class BTCAprocessor implements ItemProcessor<Trade, Totales> {
 		
 
 	}
-
+// formatea la hora y inserta en el formato que se inserta en regex
 	public String regexReplace(String regex, String texts) {
 		// REGEX that matches 1 or more white space
 		if (!texts.equals("")) {
@@ -59,7 +61,7 @@ public class BTCAprocessor implements ItemProcessor<Trade, Totales> {
 	}
 	
 	
-
+	// genera el valor en String de numero unico
 	  public  String makeSHA1Hash(String input)
 	            throws NoSuchAlgorithmException, UnsupportedEncodingException
 	        {
