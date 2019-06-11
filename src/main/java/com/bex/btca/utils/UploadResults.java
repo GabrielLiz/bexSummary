@@ -48,8 +48,8 @@ public class UploadResults {
         Eqdl.add("1EdreY2JoUNqqgiZmoFsVBfKZQCfsJ8rAMCXzXngQSBI");
 
         //EQD 2019
-        EqdFlow.add("vacio");
-        EqdFlow.add("vacio");
+        EqdFlow.add("13Zv-A7tOYFk1F4gdCHK1b3AiuQgl2chc1W-El9Yi094");
+        EqdFlow.add("1ZarXqFxryAMS0LdLz4BB0v_ga7QGl-wIRMr7641Xfn0");
         EqdFlow.add("vacio");
         EqdFlow.add("18GWdwCNiJMNKXsxyTmgUHEe6UpFcHNIdupBRtLpA4wo");
         EqdFlow.add("1e6JX4vI5nH5D_zCnhaUGjvh_VMRwLVkQx7xxxEI6L7c");
