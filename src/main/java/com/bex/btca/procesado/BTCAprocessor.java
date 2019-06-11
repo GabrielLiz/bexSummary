@@ -4,6 +4,9 @@ import java.io.UnsupportedEncodingException;
 import java.math.BigInteger;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.regex.Matcher;
@@ -36,7 +39,7 @@ public class BTCAprocessor implements ItemProcessor<Trade, Totales> {
 		} else {
 			seenUsers.add(value);	
 			item.setProcesado(true);
-			String operativa = regexReplace(regexOperativa, item.getFechadetransacción());
+			String operativa = dateMaker(regexOperativa, item.getFechadetransacción());
 			String subidaMa = regexReplace(regexSubida, item.getEnviado());
 			Totales totales = new Totales(item.getIDdetransacción().toString(), item.getVersion(), item.getEstatus(),
 					item.getISIN(), subidaMa, item.getTipodeoperación(), operativa, item.getAssetClass());
@@ -46,6 +49,31 @@ public class BTCAprocessor implements ItemProcessor<Trade, Totales> {
 		
 
 	}
+
+
+	public String dateMaker(String regex, String value) {
+		String date =regexReplace(regex, value);
+		final String OLD_FORMAT = "MM/dd/yyyy";
+		final String NEW_FORMAT = "dd/MM/yyyy";
+
+		// August 12, 2010
+		String newDateString= null;
+
+		SimpleDateFormat sdf = new SimpleDateFormat(OLD_FORMAT);
+		Date d = null;
+		try {
+		d = sdf.parse(date);
+		sdf.applyPattern(NEW_FORMAT);
+		newDateString = sdf.format(d);
+			
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		return newDateString;
+	}
+	
 // formatea la hora y inserta en el formato que se inserta en regex
 	public String regexReplace(String regex, String texts) {
 		// REGEX that matches 1 or more white space

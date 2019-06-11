@@ -13,6 +13,8 @@ import org.springframework.batch.core.configuration.annotation.EnableBatchProces
 import org.springframework.batch.core.configuration.annotation.JobBuilderFactory;
 import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
 import org.springframework.batch.core.job.builder.FlowBuilder;
+import org.springframework.batch.core.job.builder.FlowJobBuilder;
+import org.springframework.batch.core.job.builder.JobBuilder;
 import org.springframework.batch.core.job.flow.Flow;
 import org.springframework.batch.core.launch.support.RunIdIncrementer;
 import org.springframework.batch.item.ItemReader;
@@ -46,6 +48,7 @@ import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.stereotype.Component;
 
+import com.bex.btca.Window;
 import com.bex.btca.listener.JobListener;
 import com.bex.btca.listener.StepListener;
 import com.bex.btca.model.EstadisticasRFQ;
@@ -61,10 +64,10 @@ import com.bex.btca.writer.TradesWriter;
 public class BatchConfig  {
 
 	@Autowired
-	public JobBuilderFactory jobBuilderFactory;
+	private JobBuilderFactory jobBuilderFactory;
 
 	@Autowired
-	public StepBuilderFactory stepBuilderFactory;
+	private StepBuilderFactory stepBuilderFactory;
 
 	MultiResourceItemReader<Trade> readers;
 
@@ -227,11 +230,42 @@ public class BatchConfig  {
 		Flow rfqStep = new FlowBuilder<Flow>("rfqStep").start(step2(data, lis)).build();
 		Flow tradeStep = new FlowBuilder<Flow>("tradeStep").start(step3(data, lis)).build();
 		Flow carga = new FlowBuilder<Flow>("carga").start(step1).build();
-		// Ejecucion de hilos en paralelo
-		Flow rfqtradeFlow = new FlowBuilder<Flow>("rfqtradeFlow").start(rfqStep).split(new SimpleAsyncTaskExecutor())
-				.add(tradeStep).build();
-		Job job = jobBuilderFactory.get("TradesJob").incrementer(new RunIdIncrementer()).listener(listener).start(carga)
-				.next(rfqtradeFlow).next(this.step4(data, lis)).end().build();
+		Job job=null;
+		if(!Window.trade||!Window.rfqs) {
+			if(Window.trade){
+			job = jobBuilderFactory
+					.get("TradesJob")
+					.incrementer(new RunIdIncrementer())
+					.listener(listener)
+					.start(carga)
+					.next(tradeStep)
+					.next(this.step4(data, lis))
+					.end().build();
+			return job;
+		}
+		if(Window.rfqs) {
+			 job = jobBuilderFactory
+					.get("TradesJob")
+					.incrementer(new RunIdIncrementer())
+					.listener(listener)
+					.start(carga)
+					.next(rfqStep)
+					.next(this.step4(data, lis))
+					.end().build();
+			 return job;
+		}
+	}else {
+			job = jobBuilderFactory
+					.get("TradesJob")
+					.incrementer(new RunIdIncrementer())
+					.listener(listener)
+					.start(carga)
+					.next(tradeStep)
+					.next(rfqStep)
+					.next(this.step4(data, lis))
+					.end().build();
+		}
+
 		return job;
 	}
 

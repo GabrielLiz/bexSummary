@@ -27,3 +27,6 @@ id BIGINT IDENTITY NOT NULL PRIMARY KEY,
 busqueda VARCHAR(100),
 valores INTEGER
 );
+
+
+

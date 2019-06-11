@@ -1,6 +1,10 @@
 package com.bex.btca.procesado;
 
+import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -11,28 +15,26 @@ import org.springframework.batch.item.ItemProcessor;
 import com.bex.btca.model.EstadisticasRFQ;
 import com.bex.btca.model.Totales;
 
+import static com.bex.btca.utils.FilesSheetsDrive.BBG;
+import static com.bex.btca.utils.FilesSheetsDrive.EQC_BTCA_ORDER;
+import static com.bex.btca.utils.FilesSheetsDrive.EQC_BTCA_PLACEMENT;
+import static com.bex.btca.utils.FilesSheetsDrive.EQD;
+import static com.bex.btca.utils.FilesSheetsDrive.EQDL_BTCA_ORDER;
+import static com.bex.btca.utils.FilesSheetsDrive.EQDL_BTCA_PLACEMENT;
+import static com.bex.btca.utils.FilesSheetsDrive.FNC_BTCA_RFQ;
+import static com.bex.btca.utils.FilesSheetsDrive.FXALL;
+import static com.bex.btca.utils.FilesSheetsDrive.SBP_BTCA_RFQ;
+import static com.bex.btca.utils.FilesSheetsDrive.T360T;
+import static com.bex.btca.utils.FilesSheetsDrive.UM_BTCA_RFQ;
+import static com.bex.btca.utils.FilesSheetsDrive._FLOW;
+import static com.bex.btca.utils.FilesSheetsDrive.RET;
+
 public class RFQprocessor implements ItemProcessor<Totales, EstadisticasRFQ> {
-	// EQC
-	public String EQC_BTCA_ORDER = "^BBVAEQC_BTCA_ORDER_\\d{8}";
-	public String EQC_BTCA_PLACEMENT = "^BBVAEQC_BTCA_PLACEMENT_\\d{8}";
-	// FX
-	public String T360T = "^BBVA360T_BTCA_RFQ_\\d{8}";
-	public String FXALL = "^BBVAFXALL_BTCA_RFQ_\\d{8}";
-	public String RET = "^BBVARET_BTCA_RFQ_\\d{8}";
-	public String BBG = "^BBVABBG_BTCA_RFQ_\\d{8}";
-	public String UM_BTCA_RFQ = "^BBVAUM_BTCA_RFQ_\\d{8}";
-	public String FNC_BTCA_RFQ = "^BBVAFNC_BTCA_RFQ_\\d{8}";
-	// EQD
-	public String _FLOW = "^BBVAEQD_BTCA_RFQ_\\d{8}_FLOW";
-	public String EQD = "^BBVAEQD_BTCA_RFQ_\\d{8}";
 
-	// EQDL
-	public String EQDL_BTCA_ORDER = "^BBVAEQDL_BTCA_ORDER_\\d{8}";
-	public String EQDL_BTCA_PLACEMENT = "^BBVAEQDL_BTCA_PLACEMENT_\\d{8}";
-	// SBP
-	public String SBP_BTCA_RFQ = "^BBVASBP_BTCA_RFQ_\\d{8}";
+	public static final String fecha_estractor ="\\d{8}";
 
-	ArrayList<String> listaRFQ;
+
+	private ArrayList<String> listaRFQ;
 
 	public RFQprocessor() {
 		super();
@@ -61,22 +63,50 @@ public class RFQprocessor implements ItemProcessor<Totales, EstadisticasRFQ> {
 		String va = null;
 		// devuelve null si no encontra el regex 
 		for (String string : listaRFQ) {
-			va = regexFind(string, item.getVersion(), item.getStatus());
-			if (va != null) {
-				return new EstadisticasRFQ(va, "F " + item.getFecha_operativa());
+			String tx =regexFind(string, item.getVersion());
+			if (tx != null) {
+				va = tx+";"+item.getStatus()+";"+dateMaker(fecha_estractor,item.getVersion());
+
+				return new EstadisticasRFQ(va, item.getFecha_operativa());
 			}
 		}
 		return null;
 	}
 // Busca los regex de la lista
-	public String regexFind(String regex, String text, String tex2) {
+	private String regexFind(String regex, String text) {
 		// REGEX that matches 1 or more white space
 		Pattern patternOp = Pattern.compile(regex);
 		Matcher matcherOp = patternOp.matcher(text);
 		if (matcherOp.find()) {
-			return matcherOp.group() + ";" + tex2;
+			return matcherOp.group();
 		}
 		return null;
 	}
 
+	private void dateMaker(String date) {
+
+	}
+
+	private String dateMaker(String regex, String value) {
+		String date =regexFind(regex, value);
+		final String OLD_FORMAT = "yyyyMMdd";
+		final String NEW_FORMAT = "d/MM/yyyy";
+		// August 12, 2010
+		String newDateString= null;
+
+		SimpleDateFormat sdf = new SimpleDateFormat(OLD_FORMAT);
+		Date d = null;
+		try {
+		d = sdf.parse(date);
+		sdf.applyPattern(NEW_FORMAT);
+		newDateString = sdf.format(d);
+
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+		return newDateString;
+	}
+	
 }

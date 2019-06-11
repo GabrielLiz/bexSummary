@@ -39,7 +39,7 @@ public class TradesWriter implements ItemWriter<Totales> {
 
 		for (Totales totales : item) {
 			Integer i = 0;
-			String valueIndex = totales.getStatus() + ";" + "F " + totales.getFecha_operativa() + ";"
+			String valueIndex = totales.getStatus() + ";" + totales.getFecha_operativa() + ";"
 					+ totales.getAssset_class() + ";" + regexFind(totales.getId_trans(), totales.getSent()) + ";"
 					+ totales.getSent();
 		
@@ -77,7 +77,7 @@ public class TradesWriter implements ItemWriter<Totales> {
 					return "EQC";
 				}
 			} else {
-				return "EQC *";
+				return "EQC / EQDL";
 			}
 
 		}

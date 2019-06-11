@@ -5,48 +5,25 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
+import java.util.StringTokenizer;
 
 import javax.sql.DataSource;
 
 import org.springframework.batch.core.StepContribution;
 import org.springframework.batch.core.scope.context.ChunkContext;
 import org.springframework.batch.core.step.tasklet.Tasklet;
-import org.springframework.batch.item.file.FlatFileItemWriter;
 import org.springframework.batch.repeat.RepeatStatus;
-import org.springframework.core.io.FileSystemResource;
-import org.springframework.core.io.Resource;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 
+import com.bex.btca.Window;
 import com.bex.btca.model.EstadisticasTrade;
-import com.bex.btca.model.Totales;
+import com.bex.btca.utils.UploadResults;
 
 @Component
 public class TaskletStep implements Tasklet {
-	// EQC
-	public String EQC_BTCA_ORDER = "EQC_BTCA_ORDER";
-	public String EQC_BTCA_PLACEMENT = "EQC_BTCA_PLACEMENT";
-
-	// FX
-	public String T360T = "360T";
-	public String FXALL = "FXALL";
-	public String RET = "RET";
-	public String BBG = "BBG";
-	public String UM_BTCA_RFQ = "UM_BTCA_RFQ";
-	public String FNC_BTCA_RFQ = "FNC_BTCA_RFQ";
-
-	// EQD
-	public String _FLOW = "_FLOW";
-
-	// EQDL
-	public String EQDL_BTCA_ORDER = "EQDL_BTCA_ORDER";
-	public String EQDL_BTCA_PLACEMENT = "EQDL_BTCA_PLACEMENT";
-
-	// SBP
-	public String SBP_BTCA_RFQ = "SBP_BTCA_RFQ";
 
 	private StringBuilder resultadoRFQ;
 
@@ -75,16 +52,41 @@ public class TaskletStep implements Tasklet {
 		// List<String> fechaOpeTrade = jdbctemplate.queryForList("SELECT DISTINCT
 		// fecha_operativa from btca WHERE version=''", String.class);
 
+		UploadResults results = new UploadResults();
+		if (Window.subir) {
+			Window.text.setText(Window.text.getText() + "\n " + "Los siguientes valores se escriben automaticamente en los ficheros de Drive");
+		}
 		for (String stringst : fechaOpe) {
 			int i = jdbctemplate.queryForObject("SELECT COUNT(version) FROM rfq WHERE version='" + stringst + "'",
 					Integer.class);
-			resultadoRFQ.append(stringst + ";" + i + System.getProperty("line.separator"));
+			StringTokenizer datos = new StringTokenizer(stringst, ";");
+			StringBuilder valappend = new StringBuilder();
+			List<String> elements = new ArrayList<>();
+
+			// iterate through StringTokenizer tokens
+			while (datos.hasMoreTokens()) {
+				elements.add(datos.nextToken());
+			}
+			if (Window.subir) {
+				results.actualizarDatos(elements.get(0), elements.get(2), elements.get(1), i + "");
+				Window.text.setText(Window.text.getText() + "\n " + elements.get(0) + " " + elements.get(1) + " " + i + " " + elements.get(2));
+			}
+			valappend.append(elements.get(2));
+			valappend.append(elements.get(0));
+			valappend.append(elements.get(1));
+
+
+			resultadoRFQ.append(stringst + ";" + valappend + ";" + i + System.getProperty("line.separator"));
 		}
 
 		// resul.append(Trades(horadesbida, fechaOpeTrade));
 
-		writeRFQ(resultadoRFQ);
-		writeTrade(fulldata);
+		if (Window.rfqs) {
+			writeRFQ(resultadoRFQ);
+		}
+		if(Window.trade){
+			writeTrade(fulldata);
+		}
 		return null;
 	}
 
@@ -107,9 +109,11 @@ public class TaskletStep implements Tasklet {
 		FileWriter fr = null;
 		BufferedWriter br = null;
 		try {
+			StringBuilder valappend = new StringBuilder();
+
 			fr = new FileWriter(file);
 			br = new BufferedWriter(fr);
-			br.write("Plataforma;Status;total" + System.getProperty("line.separator"));
+			br.write("Plataforma;Status;File Date;Contatenado;total" + System.getProperty("line.separator"));
 			br.write(dato.toString());
 			/*
 			 * for (String fecha : fechaOpe) { br.write(fecha+
