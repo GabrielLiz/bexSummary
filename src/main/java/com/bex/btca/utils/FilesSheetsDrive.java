@@ -1,5 +1,7 @@
 package com.bex.btca.utils;
 
+import java.util.ArrayList;
+
 public class FilesSheetsDrive {
 
     // EQC
@@ -22,4 +24,21 @@ public class FilesSheetsDrive {
     // SBP
     public static final String SBP_BTCA_RFQ = "SBP_BTCA_RFQ";
 
+
+    public static ArrayList<String> listas(){
+         ArrayList<String> lista= new ArrayList<>();
+        lista.add(EQC_BTCA_ORDER);
+        lista.add(EQC_BTCA_PLACEMENT);
+        lista.add(T360T);
+        lista.add(FXALL);
+        lista.add(RET);
+        lista.add(BBG);
+        lista.add(UM_BTCA_RFQ);
+        lista.add(FNC_BTCA_RFQ);
+        lista.add(_FLOW);
+        lista.add(EQDL_BTCA_ORDER);
+        lista.add(EQDL_BTCA_PLACEMENT);
+        lista.add(SBP_BTCA_RFQ);
+        return lista;
+    }
 }

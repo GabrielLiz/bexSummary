@@ -14,6 +14,7 @@ import org.springframework.batch.item.ItemProcessor;
 
 import com.bex.btca.model.EstadisticasRFQ;
 import com.bex.btca.model.Totales;
+import com.bex.btca.utils.FilesSheetsDrive;
 
 import static com.bex.btca.utils.FilesSheetsDrive.BBG;
 import static com.bex.btca.utils.FilesSheetsDrive.EQC_BTCA_ORDER;
@@ -39,20 +40,7 @@ public class RFQprocessor implements ItemProcessor<Totales, EstadisticasRFQ> {
 	public RFQprocessor() {
 		super();
 		// una lista simple con todas las mascaras quenecesitos
-		listaRFQ = new ArrayList<String>();
-		listaRFQ.add(EQC_BTCA_ORDER);
-		listaRFQ.add(EQC_BTCA_PLACEMENT);
-		listaRFQ.add(T360T);
-		listaRFQ.add(FXALL);
-		listaRFQ.add(RET);
-		listaRFQ.add(BBG);
-		listaRFQ.add(UM_BTCA_RFQ);
-		listaRFQ.add(FNC_BTCA_RFQ);
-		listaRFQ.add(_FLOW);
-		listaRFQ.add(EQD);
-		listaRFQ.add(EQDL_BTCA_ORDER);
-		listaRFQ.add(EQDL_BTCA_PLACEMENT);
-		listaRFQ.add(SBP_BTCA_RFQ);
+		listaRFQ = FilesSheetsDrive.listas();
 
 	}
 
