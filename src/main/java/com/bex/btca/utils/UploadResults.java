@@ -123,9 +123,10 @@ public class UploadResults {
                 builder.append((char) valor);
                 valor = fileRead.read();
             }
-            StringTokenizer linea = new StringTokenizer(builder.toString(), "\r\n");
+            StringTokenizer linea = new StringTokenizer(builder.toString(), "#\r\n");
             while (linea.hasMoreTokens()) {
                 valores=linea.nextToken();
+
                 for (String lista : FilesSheetsDrive.listas()) {
                     if (valores.equals(lista)) {
                         plataforma = valores;
@@ -133,7 +134,11 @@ public class UploadResults {
                 }
 
                 if (!valores.equals(plataforma)) {
+                  if(  valores.startsWith(":")){
+                      System.out.println(valores);
+                  }else {
                      FicherosOperativa.get(plataforma).add(valores);
+                  }
                 }
 
             }

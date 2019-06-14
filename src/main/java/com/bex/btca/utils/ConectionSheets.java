@@ -66,14 +66,20 @@ public class ConectionSheets {
     public void actualizar (String spreadsheetId, String fecha, String status,String value,String version) throws IOException, GeneralSecurityException {
         // Build a new authorized API client service.
         StringBuilder cellWrite=new StringBuilder();
+        StringBuilder anterior= new StringBuilder();
+        String valorA = "0";
+        boolean escribirAnterior=false;
 
         if(version.equals(EQC_BTCA_PLACEMENT)||version.equals(EQDL_BTCA_PLACEMENT)){
              cellWrite.append("Placements");
+            anterior.append("Placements");
         }else{
              cellWrite.append("Pre_trade");
+            anterior.append("Pre_trade");
+
         }
         final NetHttpTransport HTTP_TRANSPORT = GoogleNetHttpTransport.newTrustedTransport();
-        final String range = "Pre_trade!A:A";
+        final String range = "Pre_trade!A:R";
         Sheets service = new Sheets.Builder(HTTP_TRANSPORT, JSON_FACTORY, getCredentials(HTTP_TRANSPORT))
                 .setApplicationName(APPLICATION_NAME)
                 .build();
@@ -89,22 +95,43 @@ public class ConectionSheets {
             int numb=0;
             for (List row : values) {
                 for (Object objs: row) {
+
                     if(objs.equals(fecha)){
                         numb= values.indexOf(row)+1;
                         switch (status) {
                             case "Accepted":
-                                System.out.println(cellWrite);
+                                String valorAccepted = (String)row.get(1);
+
+                                if (!valorAccepted.equals(value)){
+                                    valorA=valorAccepted;
+                                }
                                 cellWrite.append("!B").append(numb);
+                                anterior.append("!O").append(numb);
                                 break;
                             case "Send":
+                                String valorSend = (String)row.get(3);
+
+                                if (!valorSend.equals(value)){
+                                    valorA=valorSend;
+                                }
                                 cellWrite.append("!D").append(numb);
+                                anterior.append("!P").append(numb);
+
                                 break;
                             case "Rejected":
+                                String valorRejected = (String)row.get(5);
+
+                                if (!valorRejected.equals(value)){
+                                    valorA=valorRejected;
+                                }
                                 cellWrite.append("!F").append(numb);
+                                anterior.append("!Q").append(numb);
+
                                 break;
                         }
                     }
                 }
+
             }
         }
         String[] a = new String[]{value};
@@ -113,6 +140,14 @@ public class ConectionSheets {
         ValueRange body = new ValueRange().setValues(valuesWr);
 
         service.spreadsheets().values().update(spreadsheetId, cellWrite.toString(), body).setValueInputOption("USER_ENTERED").execute();
+
+        String[] b = new String[]{valorA};
+        List<List<Object>> valuesWb = Arrays.asList( Arrays.asList(b));
+
+        ValueRange bodyB = new ValueRange().setValues(valuesWb);
+
+        service.spreadsheets().values().update(spreadsheetId, anterior.toString(), bodyB).setValueInputOption("USER_ENTERED").execute();
+
         /*
 
         CellData setUserEnteredValue = new CellData()
