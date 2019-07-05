@@ -1,4 +1,5 @@
 package com.bex.btca.utils;
+
 import com.google.api.client.auth.oauth2.Credential;
 import com.google.api.client.extensions.java6.auth.oauth2.AuthorizationCodeInstalledApp;
 import com.google.api.client.extensions.jetty.auth.oauth2.LocalServerReceiver;
@@ -37,6 +38,7 @@ public class ConectionSheets {
 
     /**
      * Creates an authorized Credential object.
+     *
      * @param HTTP_TRANSPORT The network HTTP Transport.
      * @return An authorized Credential object.
      * @throws IOException If the credentials.json file cannot be found.
@@ -63,18 +65,18 @@ public class ConectionSheets {
      * Prints the names and majors of students in a sample spreadsheet:
      * https://docs.google.com/spreadsheets/d/1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgvE2upms/edit
      */
-    public void actualizar (String spreadsheetId, String fecha, String status,String value,String version) throws IOException, GeneralSecurityException {
+    public void actualizar(String spreadsheetId, String fecha, String status, String value, String version) throws IOException, GeneralSecurityException {
         // Build a new authorized API client service.
-        StringBuilder cellWrite=new StringBuilder();
-        StringBuilder anterior= new StringBuilder();
+        StringBuilder cellWrite = new StringBuilder();
+        StringBuilder anterior = new StringBuilder();
         String valorA = "0";
-        boolean escribirAnterior=false;
+        boolean escribirAnterior = false;
 
-        if(version.equals(EQC_BTCA_PLACEMENT)||version.equals(EQDL_BTCA_PLACEMENT)){
-             cellWrite.append("Placements");
+        if (version.equals(EQC_BTCA_PLACEMENT) || version.equals(EQDL_BTCA_PLACEMENT)) {
+            cellWrite.append("Placements");
             anterior.append("Placements");
-        }else{
-             cellWrite.append("Pre_trade");
+        } else {
+            cellWrite.append("Pre_trade");
             anterior.append("Pre_trade");
 
         }
@@ -92,37 +94,37 @@ public class ConectionSheets {
         if (values == null || values.isEmpty()) {
             System.out.println("No data found.");
         } else {
-            int numb=0;
+            int numb = 0;
             for (List row : values) {
-                for (Object objs: row) {
+                for (Object objs : row) {
 
-                    if(objs.equals(fecha)){
-                        numb= values.indexOf(row)+1;
+                    if (objs.equals(fecha)) {
+                        numb = values.indexOf(row) + 1;
                         switch (status) {
                             case "Accepted":
-                                String valorAccepted = (String)row.get(1);
+                                String valorAccepted = (String) row.get(1);
 
-                                if (!valorAccepted.equals(value)){
-                                    valorA=valorAccepted;
+                                if (!valorAccepted.equals(value)) {
+                                    valorA = valorAccepted;
                                 }
                                 cellWrite.append("!B").append(numb);
                                 anterior.append("!O").append(numb);
                                 break;
                             case "Send":
-                                String valorSend = (String)row.get(3);
+                                String valorSend = (String) row.get(3);
 
-                                if (!valorSend.equals(value)){
-                                    valorA=valorSend;
+                                if (!valorSend.equals(value)) {
+                                    valorA = valorSend;
                                 }
                                 cellWrite.append("!D").append(numb);
                                 anterior.append("!P").append(numb);
 
                                 break;
                             case "Rejected":
-                                String valorRejected = (String)row.get(5);
+                                String valorRejected = (String) row.get(5);
 
-                                if (!valorRejected.equals(value)){
-                                    valorA=valorRejected;
+                                if (!valorRejected.equals(value)) {
+                                    valorA = valorRejected;
                                 }
                                 cellWrite.append("!F").append(numb);
                                 anterior.append("!Q").append(numb);
@@ -135,14 +137,14 @@ public class ConectionSheets {
             }
         }
         String[] a = new String[]{value};
-        List<List<Object>> valuesWr = Arrays.asList( Arrays.asList(a));
+        List<List<Object>> valuesWr = Arrays.asList(Arrays.asList(a));
 
         ValueRange body = new ValueRange().setValues(valuesWr);
 
         service.spreadsheets().values().update(spreadsheetId, cellWrite.toString(), body).setValueInputOption("USER_ENTERED").execute();
 
         String[] b = new String[]{valorA};
-        List<List<Object>> valuesWb = Arrays.asList( Arrays.asList(b));
+        List<List<Object>> valuesWb = Arrays.asList(Arrays.asList(b));
 
         ValueRange bodyB = new ValueRange().setValues(valuesWb);
 
